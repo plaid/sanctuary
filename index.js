@@ -369,42 +369,42 @@
                         self.sanctuaryTypeIdentifiers);
   }
 
-} (function($, Either, Maybe, Pair, show, Z, type) {
+} (($, Either, Maybe, Pair, show, Z, type) => {
 
   'use strict';
 
   /* istanbul ignore if */
   if (typeof __doctest !== 'undefined') {
-    /* eslint-disable no-unused-vars */
+    /* eslint-disable no-unused-vars, no-var */
     var Descending = __doctest.require ('sanctuary-descending');
     var Nil = (__doctest.require ('./test/internal/List')).Nil;
     var Cons = (__doctest.require ('./test/internal/List')).Cons;
     var Sum = __doctest.require ('./test/internal/Sum');
     var S = (function(S) {
-      var S_ = S.create ({
+      const S_ = S.create ({
         checkTypes: true,
         env: S.env.concat ([
           (__doctest.require ('./test/internal/List')).Type ($.Unknown),
-          Sum.Type
-        ])
+          Sum.Type,
+        ]),
       });
       S_.env = S.env;  // see S.env doctest
       return S_;
     } (require ('.')));
-    /* eslint-enable no-unused-vars */
+    /* eslint-enable no-unused-vars, no-var */
   }
 
   //  Left :: a -> Either a b
-  var Left = Either.Left;
+  const Left = Either.Left;
 
   //  Right :: b -> Either a b
-  var Right = Either.Right;
+  const Right = Either.Right;
 
   //  Nothing :: Maybe a
-  var Nothing = Maybe.Nothing;
+  const Nothing = Maybe.Nothing;
 
   //  Just :: a -> Maybe a
-  var Just = Maybe.Just;
+  const Just = Maybe.Just;
 
   //  B :: (b -> c) -> (a -> b) -> a -> c
   function B(f) {
@@ -459,8 +459,7 @@
 
   //  get_ :: String -> a -> Maybe b
   function get_(key) {
-    return B (function(obj) { return key in obj ? Just (obj[key]) : Nothing; })
-             (toObject);
+    return B (obj => key in obj ? Just (obj[key]) : Nothing) (toObject);
   }
 
   //  invoke0 :: String -> a -> b
@@ -485,22 +484,22 @@
   }
 
   //  :: Type
-  var a = $.TypeVariable ('a');
-  var b = $.TypeVariable ('b');
-  var c = $.TypeVariable ('c');
-  var d = $.TypeVariable ('d');
-  var e = $.TypeVariable ('e');
-  var g = $.TypeVariable ('g');
+  const a = $.TypeVariable ('a');
+  const b = $.TypeVariable ('b');
+  const c = $.TypeVariable ('c');
+  const d = $.TypeVariable ('d');
+  const e = $.TypeVariable ('e');
+  const g = $.TypeVariable ('g');
 
   //  :: Type -> Type
-  var f = $.UnaryTypeVariable ('f');
-  var m = $.UnaryTypeVariable ('m');
-  var t = $.UnaryTypeVariable ('t');
-  var w = $.UnaryTypeVariable ('w');
+  const f = $.UnaryTypeVariable ('f');
+  const m = $.UnaryTypeVariable ('m');
+  const t = $.UnaryTypeVariable ('t');
+  const w = $.UnaryTypeVariable ('w');
 
   //  :: Type -> Type -> Type
-  var p = $.BinaryTypeVariable ('p');
-  var s = $.BinaryTypeVariable ('s');
+  const p = $.BinaryTypeVariable ('p');
+  const s = $.BinaryTypeVariable ('s');
 
   //  Throwing :: Type -> Type -> Type -> Type
   //
@@ -509,7 +508,7 @@
   function Throwing(E) {
     return function(A) {
       return function(B) {
-        var T = $.Fn (A) (B);
+        const T = $.Fn (A) (B);
         T.format = function(outer, inner) {
           return outer ('Throwing ' + show (E)) +
                  outer (' ') + inner ('$1') (show (A)) +
@@ -521,7 +520,7 @@
   }
 
   //  TypeRep :: Type -> Type
-  var TypeRep = $.UnaryType
+  const TypeRep = $.UnaryType
     ('TypeRep')
     ('https://github.com/fantasyland/fantasy-land#type-representatives')
     ([])
@@ -529,9 +528,9 @@
     (K ([]));
 
   //  Options :: Type
-  var Options = $.RecordType ({checkTypes: $.Boolean, env: $.Array ($.Any)});
+  const Options = $.RecordType ({checkTypes: $.Boolean, env: $.Array ($.Any)});
 
-  var _ = {};
+  const _ = {};
 
   //. ### Configure
 
@@ -590,15 +589,15 @@
   //.
   //. See also [`env`](#env).
   function create(opts) {
-    var def = $.create (opts);
-    var S = {
+    const def = $.create (opts);
+    const S = {
       env: opts.env,
       is: def ('is') ({}) ([$.Type, $.Any, $.Boolean]) ($.test (opts.env)),
       Maybe: Maybe,
       Nothing: Nothing,
-      Either: Either
+      Either: Either,
     };
-    (Object.keys (_)).forEach (function(name) {
+    (Object.keys (_)).forEach (name => {
       S[name] = def (name) (_[name].consts) (_[name].types) (_[name].impl);
     });
     S.unchecked = opts.checkTypes ? create ({checkTypes: false, env: opts.env})
@@ -608,7 +607,7 @@
   _.create = {
     consts: {},
     types: [Options, $.Object],
-    impl: create
+    impl: create,
   };
 
   //# env :: Array Type
@@ -682,7 +681,7 @@
   //. {namespace: Nothing, name: 'Array', version: 0}
   //. ```
   function type_(x) {
-    var r = type.parse (type (x));
+    const r = type.parse (type (x));
     r.namespace = Z.reject (equals (null), Just (r.namespace));
     return r;
   }
@@ -692,7 +691,7 @@
             $.RecordType ({namespace: $.Maybe ($.String),
                            name: $.String,
                            version: $.NonNegativeInteger})],
-    impl: type_
+    impl: type_,
   };
 
   //# is :: Type -> Any -> Boolean
@@ -730,7 +729,7 @@
   _.show = {
     consts: {},
     types: [$.Any, $.String],
-    impl: show
+    impl: show,
   };
 
   //. ### Fantasy Land
@@ -767,7 +766,7 @@
   _.equals = {
     consts: {a: [Z.Setoid]},
     types: [a, a, $.Boolean],
-    impl: equals
+    impl: equals,
   };
 
   //# lt :: Ord a => a -> a -> Boolean
@@ -787,7 +786,7 @@
   _.lt = {
     consts: {a: [Z.Ord]},
     types: [a, a, $.Boolean],
-    impl: lt
+    impl: lt,
   };
 
   //# lte :: Ord a => a -> a -> Boolean
@@ -807,7 +806,7 @@
   _.lte = {
     consts: {a: [Z.Ord]},
     types: [a, a, $.Boolean],
-    impl: lte
+    impl: lte,
   };
 
   //# gt :: Ord a => a -> a -> Boolean
@@ -827,7 +826,7 @@
   _.gt = {
     consts: {a: [Z.Ord]},
     types: [a, a, $.Boolean],
-    impl: gt
+    impl: gt,
   };
 
   //# gte :: Ord a => a -> a -> Boolean
@@ -847,7 +846,7 @@
   _.gte = {
     consts: {a: [Z.Ord]},
     types: [a, a, $.Boolean],
-    impl: gte
+    impl: gte,
   };
 
   //# min :: Ord a => a -> a -> a
@@ -869,7 +868,7 @@
   _.min = {
     consts: {a: [Z.Ord]},
     types: [a, a, a],
-    impl: curry2 (Z.min)
+    impl: curry2 (Z.min),
   };
 
   //# max :: Ord a => a -> a -> a
@@ -891,7 +890,7 @@
   _.max = {
     consts: {a: [Z.Ord]},
     types: [a, a, a],
-    impl: curry2 (Z.max)
+    impl: curry2 (Z.max),
   };
 
   //# clamp :: Ord a => a -> a -> a -> a
@@ -914,7 +913,7 @@
   _.clamp = {
     consts: {a: [Z.Ord]},
     types: [a, a, a, a],
-    impl: curry3 (Z.clamp)
+    impl: curry3 (Z.clamp),
   };
 
   //# id :: Category c => TypeRep c -> c
@@ -928,7 +927,7 @@
   _.id = {
     consts: {c: [Z.Category]},
     types: [TypeRep (c), c],
-    impl: Z.id
+    impl: Z.id,
   };
 
   //# concat :: Semigroup a => a -> a -> a
@@ -954,7 +953,7 @@
   _.concat = {
     consts: {a: [Z.Semigroup]},
     types: [a, a, a],
-    impl: curry2 (Z.concat)
+    impl: curry2 (Z.concat),
   };
 
   //# empty :: Monoid a => TypeRep a -> a
@@ -977,7 +976,7 @@
   _.empty = {
     consts: {a: [Z.Monoid]},
     types: [TypeRep (a), a],
-    impl: Z.empty
+    impl: Z.empty,
   };
 
   //# invert :: Group g => g -> g
@@ -991,7 +990,7 @@
   _.invert = {
     consts: {g: [Z.Group]},
     types: [g, g],
-    impl: Z.invert
+    impl: Z.invert,
   };
 
   //# filter :: Filterable f => (a -> Boolean) -> f a -> f a
@@ -1025,7 +1024,7 @@
   _.filter = {
     consts: {f: [Z.Filterable]},
     types: [$.Predicate (a), f (a), f (a)],
-    impl: filter
+    impl: filter,
   };
 
   //# reject :: Filterable f => (a -> Boolean) -> f a -> f a
@@ -1059,7 +1058,7 @@
   _.reject = {
     consts: {f: [Z.Filterable]},
     types: [$.Predicate (a), f (a), f (a)],
-    impl: reject
+    impl: reject,
   };
 
   //# map :: Functor f => (a -> b) -> f a -> f b
@@ -1105,7 +1104,7 @@
   _.map = {
     consts: {f: [Z.Functor]},
     types: [$.Fn (a) (b), f (a), f (b)],
-    impl: map
+    impl: map,
   };
 
   //# flip :: Functor f => f (a -> b) -> a -> f b
@@ -1144,7 +1143,7 @@
   _.flip = {
     consts: {f: [Z.Functor]},
     types: [f ($.Fn (a) (b)), a, f (b)],
-    impl: flip
+    impl: flip,
   };
 
   //# bimap :: Bifunctor f => (a -> b) -> (c -> d) -> f a c -> f b d
@@ -1164,7 +1163,7 @@
   _.bimap = {
     consts: {p: [Z.Bifunctor]},
     types: [$.Fn (a) (b), $.Fn (c) (d), p (a) (c), p (b) (d)],
-    impl: curry3 (Z.bimap)
+    impl: curry3 (Z.bimap),
   };
 
   //# mapLeft :: Bifunctor f => (a -> b) -> f a c -> f b c
@@ -1185,7 +1184,7 @@
   _.mapLeft = {
     consts: {p: [Z.Bifunctor]},
     types: [$.Fn (a) (b), p (a) (c), p (b) (c)],
-    impl: curry2 (Z.mapLeft)
+    impl: curry2 (Z.mapLeft),
   };
 
   //# promap :: Profunctor p => (a -> b) -> (c -> d) -> p b c -> p a d
@@ -1199,7 +1198,7 @@
   _.promap = {
     consts: {p: [Z.Profunctor]},
     types: [$.Fn (a) (b), $.Fn (c) (d), p (b) (c), p (a) (d)],
-    impl: curry3 (Z.promap)
+    impl: curry3 (Z.promap),
   };
 
   //# alt :: Alt f => f a -> f a -> f a
@@ -1228,7 +1227,7 @@
   _.alt = {
     consts: {f: [Z.Alt]},
     types: [f (a), f (a), f (a)],
-    impl: alt
+    impl: alt,
   };
 
   //# zero :: Plus f => TypeRep f -> f a
@@ -1248,7 +1247,7 @@
   _.zero = {
     consts: {f: [Z.Plus]},
     types: [TypeRep (f (a)), f (a)],
-    impl: Z.zero
+    impl: Z.zero,
   };
 
   //# reduce :: Foldable f => (b -> a -> b) -> b -> f a -> b
@@ -1273,16 +1272,14 @@
   function reduce(f) {
     return function(initial) {
       return function(foldable) {
-        return Z.reduce (function(y, x) { return f (y) (x); },
-                         initial,
-                         foldable);
+        return Z.reduce ((y, x) => f (y) (x), initial, foldable);
       };
     };
   }
   _.reduce = {
     consts: {f: [Z.Foldable]},
     types: [$.Fn (b) ($.Fn (a) (b)), b, f (a), b],
-    impl: reduce
+    impl: reduce,
   };
 
   //# reduce_ :: Foldable f => (a -> b -> b) -> b -> f a -> b
@@ -1300,7 +1297,7 @@
   _.reduce_ = {
     consts: {f: [Z.Foldable]},
     types: [$.Fn (a) ($.Fn (b) (b)), b, f (a), b],
-    impl: B (reduce) (flip)
+    impl: B (reduce) (flip),
   };
 
   //# traverse :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)
@@ -1329,7 +1326,7 @@
   _.traverse = {
     consts: {f: [Z.Applicative], t: [Z.Traversable]},
     types: [TypeRep (f (b)), $.Fn (a) (f (b)), t (a), f (t (b))],
-    impl: curry3 (Z.traverse)
+    impl: curry3 (Z.traverse),
   };
 
   //# sequence :: (Applicative f, Traversable t) => TypeRep f -> t (f a) -> f (t a)
@@ -1356,7 +1353,7 @@
   _.sequence = {
     consts: {f: [Z.Applicative], t: [Z.Traversable]},
     types: [TypeRep (f (a)), t (f (a)), f (t (a))],
-    impl: curry2 (Z.sequence)
+    impl: curry2 (Z.sequence),
   };
 
   //# ap :: Apply f => f (a -> b) -> f a -> f b
@@ -1391,7 +1388,7 @@
   _.ap = {
     consts: {f: [Z.Apply]},
     types: [f ($.Fn (a) (b)), f (a), f (b)],
-    impl: curry2 (Z.ap)
+    impl: curry2 (Z.ap),
   };
 
   //# lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
@@ -1415,7 +1412,7 @@
   _.lift2 = {
     consts: {f: [Z.Apply]},
     types: [$.Fn (a) ($.Fn (b) (c)), f (a), f (b), f (c)],
-    impl: curry3 (Z.lift2)
+    impl: curry3 (Z.lift2),
   };
 
   //# lift3 :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
@@ -1433,7 +1430,7 @@
   _.lift3 = {
     consts: {f: [Z.Apply]},
     types: [$.Fn (a) ($.Fn (b) ($.Fn (c) (d))), f (a), f (b), f (c), f (d)],
-    impl: curry4 (Z.lift3)
+    impl: curry4 (Z.lift3),
   };
 
   //# apFirst :: Apply f => f a -> f b -> f a
@@ -1454,7 +1451,7 @@
   _.apFirst = {
     consts: {f: [Z.Apply]},
     types: [f (a), f (b), f (a)],
-    impl: curry2 (Z.apFirst)
+    impl: curry2 (Z.apFirst),
   };
 
   //# apSecond :: Apply f => f a -> f b -> f b
@@ -1475,7 +1472,7 @@
   _.apSecond = {
     consts: {f: [Z.Apply]},
     types: [f (a), f (b), f (b)],
-    impl: curry2 (Z.apSecond)
+    impl: curry2 (Z.apSecond),
   };
 
   //# of :: Applicative f => TypeRep f -> a -> f a
@@ -1503,7 +1500,7 @@
   _.of = {
     consts: {f: [Z.Applicative]},
     types: [TypeRep (f (a)), a, f (a)],
-    impl: of
+    impl: of,
   };
 
   //# chain :: Chain m => (a -> m b) -> m a -> m b
@@ -1526,7 +1523,7 @@
   _.chain = {
     consts: {m: [Z.Chain]},
     types: [$.Fn (a) (m (b)), m (a), m (b)],
-    impl: curry2 (Z.chain)
+    impl: curry2 (Z.chain),
   };
 
   //# join :: Chain m => m (m a) -> m a
@@ -1562,7 +1559,7 @@
   _.join = {
     consts: {m: [Z.Chain]},
     types: [m (m (a)), m (a)],
-    impl: Z.join
+    impl: Z.join,
   };
 
   //# chainRec :: ChainRec m => TypeRep m -> (a -> m (Either a b)) -> a -> m b
@@ -1591,7 +1588,7 @@
   _.chainRec = {
     consts: {m: [Z.ChainRec]},
     types: [TypeRep (m (b)), $.Fn (a) (m ($.Either (a) (b))), a, m (b)],
-    impl: chainRec
+    impl: chainRec,
   };
 
   //# extend :: Extend w => (w a -> b) -> w a -> w b
@@ -1608,7 +1605,7 @@
   _.extend = {
     consts: {w: [Z.Extend]},
     types: [$.Fn (w (a)) (b), w (a), w (b)],
-    impl: curry2 (Z.extend)
+    impl: curry2 (Z.extend),
   };
 
   //# duplicate :: Extend w => w a -> w (w a)
@@ -1632,7 +1629,7 @@
   _.duplicate = {
     consts: {w: [Z.Extend]},
     types: [w (a), w (w (a))],
-    impl: Z.duplicate
+    impl: Z.duplicate,
   };
 
   //# extract :: Comonad w => w a -> a
@@ -1646,7 +1643,7 @@
   _.extract = {
     consts: {w: [Z.Comonad]},
     types: [w (a), a],
-    impl: Z.extract
+    impl: Z.extract,
   };
 
   //# contramap :: Contravariant f => (b -> a) -> f a -> f b
@@ -1660,7 +1657,7 @@
   _.contramap = {
     consts: {f: [Z.Contravariant]},
     types: [$.Fn (b) (a), f (a), f (b)],
-    impl: curry2 (Z.contramap)
+    impl: curry2 (Z.contramap),
   };
 
   //. ### Combinator
@@ -1680,7 +1677,7 @@
   _.I = {
     consts: {},
     types: [a, a],
-    impl: I
+    impl: I,
   };
 
   //# K :: a -> b -> a
@@ -1703,7 +1700,7 @@
   _.K = {
     consts: {},
     types: [a, b, a],
-    impl: K
+    impl: K,
   };
 
   //# T :: a -> (a -> b) -> b
@@ -1727,7 +1724,7 @@
   _.T = {
     consts: {},
     types: [a, $.Fn (a) (b), b],
-    impl: T
+    impl: T,
   };
 
   //. ### Composition
@@ -1751,7 +1748,7 @@
   _.compose = {
     consts: {s: [Z.Semigroupoid]},
     types: [s (b) (c), s (a) (b), s (a) (c)],
-    impl: curry2 (Z.compose)
+    impl: curry2 (Z.compose),
   };
 
   //# pipe :: Foldable f => f (Any -> Any) -> a -> b
@@ -1775,7 +1772,7 @@
   _.pipe = {
     consts: {f: [Z.Foldable]},
     types: [f ($.Fn ($.Any) ($.Any)), a, b],
-    impl: pipe
+    impl: pipe,
   };
 
   //# pipeK :: (Foldable f, Chain m) => f (Any -> m Any) -> m a -> m b
@@ -1794,13 +1791,13 @@
   //. ```
   function pipeK(fs) {
     return function(x) {
-      return Z.reduce (function(x, f) { return Z.chain (f, x); }, x, fs);
+      return Z.reduce ((x, f) => Z.chain (f, x), x, fs);
     };
   }
   _.pipeK = {
     consts: {f: [Z.Foldable], m: [Z.Chain]},
     types: [f ($.Fn ($.Any) (m ($.Any))), m (a), m (b)],
-    impl: pipeK
+    impl: pipeK,
   };
 
   //# on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
@@ -1826,7 +1823,7 @@
   _.on = {
     consts: {},
     types: [$.Fn (b) ($.Fn (b) (c)), $.Fn (a) (b), a, a, c],
-    impl: on
+    impl: on,
   };
 
   //. ### Pair
@@ -1848,7 +1845,7 @@
   _.Pair = {
     consts: {},
     types: [a, b, $.Pair (a) (b)],
-    impl: Pair
+    impl: Pair,
   };
 
   //# pair :: (a -> b -> c) -> Pair a b -> c
@@ -1867,7 +1864,7 @@
   _.pair = {
     consts: {},
     types: [$.Fn (a) ($.Fn (b) (c)), $.Pair (a) (b), c],
-    impl: pair
+    impl: pair,
   };
 
   //# fst :: Pair a b -> a
@@ -1881,7 +1878,7 @@
   _.fst = {
     consts: {},
     types: [$.Pair (a) (b), a],
-    impl: pair (K)
+    impl: pair (K),
   };
 
   //# snd :: Pair a b -> b
@@ -1895,7 +1892,7 @@
   _.snd = {
     consts: {},
     types: [$.Pair (a) (b), b],
-    impl: pair (C (K))
+    impl: pair (C (K)),
   };
 
   //# swap :: Pair a b -> Pair b a
@@ -1909,7 +1906,7 @@
   _.swap = {
     consts: {},
     types: [$.Pair (a) (b), $.Pair (b) (a)],
-    impl: pair (C (Pair))
+    impl: pair (C (Pair)),
   };
 
   //. ### Maybe
@@ -1943,7 +1940,7 @@
   _.Just = {
     consts: {},
     types: [a, $.Maybe (a)],
-    impl: Just
+    impl: Just,
   };
 
   //# isNothing :: Maybe a -> Boolean
@@ -1963,7 +1960,7 @@
   _.isNothing = {
     consts: {},
     types: [$.Maybe (a), $.Boolean],
-    impl: isNothing
+    impl: isNothing,
   };
 
   //# isJust :: Maybe a -> Boolean
@@ -1983,7 +1980,7 @@
   _.isJust = {
     consts: {},
     types: [$.Maybe (a), $.Boolean],
-    impl: isJust
+    impl: isJust,
   };
 
   //# maybe :: b -> (a -> b) -> Maybe a -> b
@@ -2011,7 +2008,7 @@
   _.maybe = {
     consts: {},
     types: [b, $.Fn (a) (b), $.Maybe (a), b],
-    impl: maybe
+    impl: maybe,
   };
 
   //# maybe_ :: (() -> b) -> (a -> b) -> Maybe a -> b
@@ -2038,7 +2035,7 @@
   _.maybe_ = {
     consts: {},
     types: [$.Thunk (b), $.Fn (a) (b), $.Maybe (a), b],
-    impl: maybe_
+    impl: maybe_,
   };
 
   //# fromMaybe :: a -> Maybe a -> a
@@ -2059,7 +2056,7 @@
   _.fromMaybe = {
     consts: {},
     types: [a, $.Maybe (a), a],
-    impl: C (maybe) (I)
+    impl: C (maybe) (I),
   };
 
   //# fromMaybe_ :: (() -> a) -> Maybe a -> a
@@ -2079,7 +2076,7 @@
   _.fromMaybe_ = {
     consts: {},
     types: [$.Thunk (a), $.Maybe (a), a],
-    impl: C (maybe_) (I)
+    impl: C (maybe_) (I),
   };
 
   //# justs :: (Filterable f, Functor f) => f (Maybe a) -> f a
@@ -2099,7 +2096,7 @@
   _.justs = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [f ($.Maybe (a)), f (a)],
-    impl: justs
+    impl: justs,
   };
 
   //# mapMaybe :: (Filterable f, Functor f) => (a -> Maybe b) -> f a -> f b
@@ -2119,7 +2116,7 @@
   _.mapMaybe = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [$.Fn (a) ($.Maybe (b)), f (a), f (b)],
-    impl: B (B (justs)) (map)
+    impl: B (B (justs)) (map),
   };
 
   //# maybeToNullable :: Maybe a -> Nullable a
@@ -2142,7 +2139,7 @@
   _.maybeToNullable = {
     consts: {},
     types: [$.Maybe (a), $.Nullable (a)],
-    impl: maybeToNullable
+    impl: maybeToNullable,
   };
 
   //. ### Either
@@ -2168,7 +2165,7 @@
   _.Left = {
     consts: {},
     types: [a, $.Either (a) (b)],
-    impl: Left
+    impl: Left,
   };
 
   //# Right :: b -> Either a b
@@ -2182,7 +2179,7 @@
   _.Right = {
     consts: {},
     types: [b, $.Either (a) (b)],
-    impl: Right
+    impl: Right,
   };
 
   //# isLeft :: Either a b -> Boolean
@@ -2202,7 +2199,7 @@
   _.isLeft = {
     consts: {},
     types: [$.Either (a) (b), $.Boolean],
-    impl: isLeft
+    impl: isLeft,
   };
 
   //# isRight :: Either a b -> Boolean
@@ -2222,7 +2219,7 @@
   _.isRight = {
     consts: {},
     types: [$.Either (a) (b), $.Boolean],
-    impl: isRight
+    impl: isRight,
   };
 
   //# either :: (a -> c) -> (b -> c) -> Either a b -> c
@@ -2251,7 +2248,7 @@
   _.either = {
     consts: {},
     types: [$.Fn (a) (c), $.Fn (b) (c), $.Either (a) (b), c],
-    impl: either
+    impl: either,
   };
 
   //# fromLeft :: a -> Either a b -> a
@@ -2274,7 +2271,7 @@
   _.fromLeft = {
     consts: {},
     types: [a, $.Either (a) (b), a],
-    impl: fromLeft
+    impl: fromLeft,
   };
 
   //# fromRight :: b -> Either a b -> b
@@ -2297,7 +2294,7 @@
   _.fromRight = {
     consts: {},
     types: [b, $.Either (a) (b), b],
-    impl: fromRight
+    impl: fromRight,
   };
 
   //# fromEither :: Either a a -> a
@@ -2317,7 +2314,7 @@
   _.fromEither = {
     consts: {},
     types: [$.Either (a) (a), a],
-    impl: either (I) (I)
+    impl: either (I) (I),
   };
 
   //# lefts :: (Filterable f, Functor f) => f (Either a b) -> f a
@@ -2334,7 +2331,7 @@
   _.lefts = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [f ($.Either (a) (b)), f (a)],
-    impl: B (map (prop ('value'))) (filter (isLeft))
+    impl: B (map (prop ('value'))) (filter (isLeft)),
   };
 
   //# rights :: (Filterable f, Functor f) => f (Either a b) -> f b
@@ -2351,7 +2348,7 @@
   _.rights = {
     consts: {f: [Z.Filterable, Z.Functor]},
     types: [f ($.Either (a) (b)), f (b)],
-    impl: B (map (prop ('value'))) (filter (isRight))
+    impl: B (map (prop ('value'))) (filter (isRight)),
   };
 
   //# tagBy :: (a -> Boolean) -> a -> Either a a
@@ -2372,7 +2369,7 @@
   _.tagBy = {
     consts: {},
     types: [$.Predicate (a), a, $.Either (a) (a)],
-    impl: tagBy
+    impl: tagBy,
   };
 
   //# encase :: Throwing e a b -> a -> Either e b
@@ -2398,7 +2395,7 @@
   _.encase = {
     consts: {},
     types: [Throwing (e) (a) (b), a, $.Either (e) (b)],
-    impl: encase
+    impl: encase,
   };
 
   //. ### Logic
@@ -2428,7 +2425,7 @@
   _.and = {
     consts: {},
     types: [$.Boolean, $.Boolean, $.Boolean],
-    impl: and
+    impl: and,
   };
 
   //# or :: Boolean -> Boolean -> Boolean
@@ -2456,7 +2453,7 @@
   _.or = {
     consts: {},
     types: [$.Boolean, $.Boolean, $.Boolean],
-    impl: or
+    impl: or,
   };
 
   //# not :: Boolean -> Boolean
@@ -2478,7 +2475,7 @@
   _.not = {
     consts: {},
     types: [$.Boolean, $.Boolean],
-    impl: not
+    impl: not,
   };
 
   //# complement :: (a -> Boolean) -> a -> Boolean
@@ -2498,7 +2495,7 @@
   _.complement = {
     consts: {},
     types: [$.Predicate (a), a, $.Boolean],
-    impl: B (not)
+    impl: B (not),
   };
 
   //# boolean :: a -> a -> Boolean -> a
@@ -2523,7 +2520,7 @@
   _.boolean = {
     consts: {},
     types: [a, a, $.Boolean, a],
-    impl: boolean
+    impl: boolean,
   };
 
   //# ifElse :: (a -> Boolean) -> (a -> b) -> (a -> b) -> a -> b
@@ -2555,7 +2552,7 @@
   _.ifElse = {
     consts: {},
     types: [$.Predicate (a), $.Fn (a) (b), $.Fn (a) (b), a, b],
-    impl: ifElse
+    impl: ifElse,
   };
 
   //# when :: (a -> Boolean) -> (a -> a) -> a -> a
@@ -2579,7 +2576,7 @@
   _.when = {
     consts: {},
     types: [$.Predicate (a), $.Fn (a) (a), a, a],
-    impl: when
+    impl: when,
   };
 
   //# unless :: (a -> Boolean) -> (a -> a) -> a -> a
@@ -2603,7 +2600,7 @@
   _.unless = {
     consts: {},
     types: [$.Predicate (a), $.Fn (a) (a), a, a],
-    impl: unless
+    impl: unless,
   };
 
   //. ### Array
@@ -2635,7 +2632,7 @@
   _.array = {
     consts: {},
     types: [b, $.Fn (a) ($.Fn ($.Array (a)) (b)), $.Array (a), b],
-    impl: array
+    impl: array,
   };
 
   //# head :: Foldable f => f a -> Maybe a
@@ -2661,14 +2658,12 @@
     if (Array.isArray (foldable)) {
       return foldable.length > 0 ? Just (foldable[0]) : Nothing;
     }
-    return Z.reduce (function(m, x) { return m.isJust ? m : Just (x); },
-                     Nothing,
-                     foldable);
+    return Z.reduce ((m, x) => m.isJust ? m : Just (x), Nothing, foldable);
   }
   _.head = {
     consts: {f: [Z.Foldable]},
     types: [f (a), $.Maybe (a)],
-    impl: head
+    impl: head,
   };
 
   //# last :: Foldable f => f a -> Maybe a
@@ -2695,12 +2690,12 @@
       return foldable.length > 0 ? Just (foldable[foldable.length - 1])
                                  : Nothing;
     }
-    return Z.reduce (function(_, x) { return Just (x); }, Nothing, foldable);
+    return Z.reduce ((_, x) => Just (x), Nothing, foldable);
   }
   _.last = {
     consts: {f: [Z.Foldable]},
     types: [f (a), $.Maybe (a)],
-    impl: last
+    impl: last,
   };
 
   //# tail :: (Applicative f, Foldable f, Monoid (f a)) => f a -> Maybe (f a)
@@ -2726,15 +2721,15 @@
     if (Array.isArray (foldable)) {
       return foldable.length > 0 ? Just (foldable.slice (1)) : Nothing;
     }
-    var empty = Z.empty (foldable.constructor);
-    return Z.reduce (function(m, x) {
-      return Just (maybe (empty) (append (x)) (m));
-    }, Nothing, foldable);
+    const empty = Z.empty (foldable.constructor);
+    return Z.reduce ((m, x) => Just (maybe (empty) (append (x)) (m)),
+                     Nothing,
+                     foldable);
   }
   _.tail = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [f (a), $.Maybe (f (a))],
-    impl: tail
+    impl: tail,
   };
 
   //# init :: (Applicative f, Foldable f, Monoid (f a)) => f a -> Maybe (f a)
@@ -2760,15 +2755,18 @@
     if (Array.isArray (foldable)) {
       return foldable.length > 0 ? Just (foldable.slice (0, -1)) : Nothing;
     }
-    var empty = Z.empty (foldable.constructor);
-    return Z.map (Pair.snd, Z.reduce (function(m, x) {
-      return Just (Pair (x) (maybe (empty) (pair (append)) (m)));
-    }, Nothing, foldable));
+    const empty = Z.empty (foldable.constructor);
+    return Z.map (
+      Pair.snd,
+      Z.reduce ((m, x) => Just (Pair (x) (maybe (empty) (pair (append)) (m))),
+                Nothing,
+                foldable)
+    );
   }
   _.init = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [f (a), $.Maybe (f (a))],
-    impl: init
+    impl: init,
   };
 
   //# take :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
@@ -2804,26 +2802,28 @@
         }
 
         //  m :: Maybe (Pair Integer (f a))
-        var m = Z.reduce (function(m, x) {
-          return Z.map (function(pair) {
-            var n = pair.fst;
-            var xs = pair.snd;
-            return Pair (n - 1) (generalCase (n, xs, x));
-          }, m);
-        }, Just (Pair (n) (Z.empty (xs.constructor))), xs);
-
+        const m = Z.reduce (
+          (m, x) =>
+            Z.map (pair => {
+              const n = pair.fst;
+              const xs = pair.snd;
+              return Pair (n - 1) (generalCase (n, xs, x));
+            }, m),
+          Just (Pair (n) (Z.empty (xs.constructor))),
+          xs
+        );
         return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
       };
     };
   }
-  var take = _takeDrop (
-    function(n, xs) { return xs.slice (0, n); },
-    function(n, xs, x) { return n > 0 ? Z.append (x, xs) : xs; }
+  const take = _takeDrop (
+    (n, xs) => xs.slice (0, n),
+    (n, xs, x) => n > 0 ? Z.append (x, xs) : xs
   );
   _.take = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [$.Integer, f (a), $.Maybe (f (a))],
-    impl: take
+    impl: take,
   };
 
   //# drop :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
@@ -2848,14 +2848,14 @@
   //. > S.drop (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Cons (5) (Nil))))))
   //. Just (Cons (4) (Cons (5) (Nil)))
   //. ```
-  var drop = _takeDrop (
-    function(n, xs) { return xs.slice (n); },
-    function(n, xs, x) { return n > 0 ? xs : Z.append (x, xs); }
+  const drop = _takeDrop (
+    (n, xs) => xs.slice (n),
+    (n, xs, x) => n > 0 ? xs : Z.append (x, xs)
   );
   _.drop = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [$.Integer, f (a), $.Maybe (f (a))],
-    impl: drop
+    impl: drop,
   };
 
   //# takeLast :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
@@ -2888,7 +2888,7 @@
   _.takeLast = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [$.Integer, f (a), $.Maybe (f (a))],
-    impl: takeLast
+    impl: takeLast,
   };
 
   //# dropLast :: (Applicative f, Foldable f, Monoid (f a)) => Integer -> f a -> Maybe (f a)
@@ -2921,7 +2921,7 @@
   _.dropLast = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [$.Integer, f (a), $.Maybe (f (a))],
-    impl: dropLast
+    impl: dropLast,
   };
 
   //# takeWhile :: (a -> Boolean) -> Array a -> Array a
@@ -2940,7 +2940,7 @@
   //. ```
   function takeWhile(pred) {
     return function(xs) {
-      var idx = 0;
+      let idx = 0;
       while (idx < xs.length && pred (xs[idx])) idx += 1;
       return xs.slice (0, idx);
     };
@@ -2948,7 +2948,7 @@
   _.takeWhile = {
     consts: {},
     types: [$.Predicate (a), $.Array (a), $.Array (a)],
-    impl: takeWhile
+    impl: takeWhile,
   };
 
   //# dropWhile :: (a -> Boolean) -> Array a -> Array a
@@ -2967,7 +2967,7 @@
   //. ```
   function dropWhile(pred) {
     return function(xs) {
-      var idx = 0;
+      let idx = 0;
       while (idx < xs.length && pred (xs[idx])) idx += 1;
       return xs.slice (idx);
     };
@@ -2975,7 +2975,7 @@
   _.dropWhile = {
     consts: {},
     types: [$.Predicate (a), $.Array (a), $.Array (a)],
-    impl: dropWhile
+    impl: dropWhile,
   };
 
   //# size :: Foldable f => f a -> NonNegativeInteger
@@ -3007,7 +3007,7 @@
   _.size = {
     consts: {f: [Z.Foldable]},
     types: [f (a), $.NonNegativeInteger],
-    impl: Z.size
+    impl: Z.size,
   };
 
   //# all :: Foldable f => (a -> Boolean) -> f a -> Boolean
@@ -3030,7 +3030,7 @@
   _.all = {
     consts: {f: [Z.Foldable]},
     types: [$.Predicate (a), f (a), $.Boolean],
-    impl: curry2 (Z.all)
+    impl: curry2 (Z.all),
   };
 
   //# any :: Foldable f => (a -> Boolean) -> f a -> Boolean
@@ -3053,7 +3053,7 @@
   _.any = {
     consts: {f: [Z.Foldable]},
     types: [$.Predicate (a), f (a), $.Boolean],
-    impl: curry2 (Z.any)
+    impl: curry2 (Z.any),
   };
 
   //# none :: Foldable f => (a -> Boolean) -> f a -> Boolean
@@ -3084,7 +3084,7 @@
   _.none = {
     consts: {f: [Z.Foldable]},
     types: [$.Predicate (a), f (a), $.Boolean],
-    impl: curry2 (Z.none)
+    impl: curry2 (Z.none),
   };
 
   //# append :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
@@ -3114,7 +3114,7 @@
   _.append = {
     consts: {f: [Z.Applicative, Z.Semigroup]},
     types: [a, f (a), f (a)],
-    impl: append
+    impl: append,
   };
 
   //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
@@ -3139,7 +3139,7 @@
   _.prepend = {
     consts: {f: [Z.Applicative, Z.Semigroup]},
     types: [a, f (a), f (a)],
-    impl: curry2 (Z.prepend)
+    impl: curry2 (Z.prepend),
   };
 
   //# joinWith :: String -> Array String -> String
@@ -3160,7 +3160,7 @@
   _.joinWith = {
     consts: {},
     types: [$.String, $.Array ($.String), $.String],
-    impl: invoke1 ('join')
+    impl: invoke1 ('join'),
   };
 
   //# elem :: (Setoid a, Foldable f) => a -> f a -> Boolean
@@ -3195,7 +3195,7 @@
   _.elem = {
     consts: {a: [Z.Setoid], f: [Z.Foldable]},
     types: [a, f (a), $.Boolean],
-    impl: curry2 (Z.elem)
+    impl: curry2 (Z.elem),
   };
 
   //# find :: Foldable f => (a -> Boolean) -> f a -> Maybe a
@@ -3214,12 +3214,12 @@
   //. Nothing
   //. ```
   function find(pred) {
-    return findMap (function(x) { return pred (x) ? Just (x) : Nothing; });
+    return findMap (x => pred (x) ? Just (x) : Nothing);
   }
   _.find = {
     consts: {f: [Z.Foldable]},
     types: [$.Predicate (a), f (a), $.Maybe (a)],
-    impl: find
+    impl: find,
   };
 
   //# findMap :: Foldable f => (a -> Maybe b) -> f a -> Maybe b
@@ -3243,17 +3243,13 @@
   //. ```
   function findMap(f) {
     return function(xs) {
-      return Z.reduce (
-        function(m, x) { return m.isJust ? m : f (x); },
-        Nothing,
-        xs
-      );
+      return Z.reduce ((m, x) => m.isJust ? m : f (x), Nothing, xs);
     };
   }
   _.findMap = {
     consts: {f: [Z.Foldable]},
     types: [$.Fn (a) ($.Maybe (b)), f (a), $.Maybe (b)],
-    impl: findMap
+    impl: findMap,
   };
 
   //# intercalate :: (Monoid m, Foldable f) => m -> f m -> m
@@ -3286,7 +3282,7 @@
   _.intercalate = {
     consts: {a: [Z.Monoid], f: [Z.Foldable]},
     types: [a, f (a), a],
-    impl: curry2 (Z.intercalate)
+    impl: curry2 (Z.intercalate),
   };
 
   //# foldMap :: (Monoid m, Foldable f) => TypeRep m -> (a -> m) -> f a -> m
@@ -3304,7 +3300,7 @@
   _.foldMap = {
     consts: {b: [Z.Monoid], f: [Z.Foldable]},
     types: [TypeRep (b), $.Fn (a) (b), f (a), b],
-    impl: curry3 (Z.foldMap)
+    impl: curry3 (Z.foldMap),
   };
 
   //# unfold :: (b -> Maybe (Pair a b)) -> b -> Array a
@@ -3325,8 +3321,8 @@
   //. ```
   function unfold(f) {
     return function(x) {
-      var result = [];
-      for (var m = f (x); m.isJust; m = f (m.value.snd)) {
+      const result = [];
+      for (let m = f (x); m.isJust; m = f (m.value.snd)) {
         result.push (m.value.fst);
       }
       return result;
@@ -3335,7 +3331,7 @@
   _.unfold = {
     consts: {},
     types: [$.Fn (b) ($.Maybe ($.Pair (a) (b))), b, $.Array (a)],
-    impl: unfold
+    impl: unfold,
   };
 
   //# range :: Integer -> Integer -> Array Integer
@@ -3356,15 +3352,15 @@
   //. ```
   function range(from) {
     return function(to) {
-      var result = [];
-      for (var n = from; n < to; n += 1) result.push (n);
+      const result = [];
+      for (let n = from; n < to; n += 1) result.push (n);
       return result;
     };
   }
   _.range = {
     consts: {},
     types: [$.Integer, $.Integer, $.Array ($.Integer)],
-    impl: range
+    impl: range,
   };
 
   //# groupBy :: (a -> a -> Boolean) -> Array a -> Array (Array a)
@@ -3390,11 +3386,11 @@
   function groupBy(f) {
     return function(xs) {
       if (xs.length === 0) return [];
-      var x0 = xs[0];         // :: a
-      var active = [x0];      // :: Array a
-      var result = [active];  // :: Array (Array a)
-      for (var idx = 1; idx < xs.length; idx += 1) {
-        var x = xs[idx];
+      let x0 = xs[0];           // :: a
+      let active = [x0];        // :: Array a
+      const result = [active];  // :: Array (Array a)
+      for (let idx = 1; idx < xs.length; idx += 1) {
+        const x = xs[idx];
         if (f (x0) (x)) active.push (x); else result.push (active = [x0 = x]);
       }
       return result;
@@ -3403,7 +3399,7 @@
   _.groupBy = {
     consts: {},
     types: [$.Fn (a) ($.Predicate (a)), $.Array (a), $.Array ($.Array (a))],
-    impl: groupBy
+    impl: groupBy,
   };
 
   //# reverse :: (Applicative f, Foldable f, Monoid (f a)) => f a -> f a
@@ -3423,7 +3419,7 @@
   _.reverse = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [f (a), f (a)],
-    impl: Z.reverse
+    impl: Z.reverse,
   };
 
   //# sort :: (Ord a, Applicative m, Foldable m, Monoid (m a)) => m a -> m a
@@ -3447,7 +3443,7 @@
   _.sort = {
     consts: {a: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [m (a), m (a)],
-    impl: Z.sort
+    impl: Z.sort,
   };
 
   //# sortBy :: (Ord b, Applicative m, Foldable m, Monoid (m a)) => (a -> b) -> m a -> m a
@@ -3495,7 +3491,7 @@
   _.sortBy = {
     consts: {b: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
     types: [$.Fn (a) (b), m (a), m (a)],
-    impl: curry2 (Z.sortBy)
+    impl: curry2 (Z.sortBy),
   };
 
   //# zip :: Array a -> Array b -> Array (Pair a b)
@@ -3516,7 +3512,7 @@
   _.zip = {
     consts: {},
     types: [$.Array (a), $.Array (b), $.Array ($.Pair (a) (b))],
-    impl: zipWith (Pair)
+    impl: zipWith (Pair),
   };
 
   //# zipWith :: (a -> b -> c) -> Array a -> Array b -> Array c
@@ -3537,9 +3533,9 @@
   function zipWith(f) {
     return function(xs) {
       return function(ys) {
-        var result = [];
-        var len = Math.min (xs.length, ys.length);
-        for (var idx = 0; idx < len; idx += 1) {
+        const result = [];
+        const len = Math.min (xs.length, ys.length);
+        for (let idx = 0; idx < len; idx += 1) {
           result.push (f (xs[idx]) (ys[idx]));
         }
         return result;
@@ -3549,7 +3545,7 @@
   _.zipWith = {
     consts: {},
     types: [$.Fn (a) ($.Fn (b) (c)), $.Array (a), $.Array (b), $.Array (c)],
-    impl: zipWith
+    impl: zipWith,
   };
 
   //. ### Object
@@ -3569,7 +3565,7 @@
   //. ```
   function prop(key) {
     return function(x) {
-      var obj = toObject (x);
+      const obj = toObject (x);
       if (key in obj) return obj[key];
       throw new TypeError ('‘prop’ expected object to have a property named ' +
                            '‘' + key + '’; ' + show (x) + ' does not');
@@ -3578,7 +3574,7 @@
   _.prop = {
     consts: {},
     types: [$.String, a, b],
-    impl: prop
+    impl: prop,
   };
 
   //# props :: Array String -> a -> b
@@ -3596,8 +3592,8 @@
   //. ```
   function props(path) {
     return function(x) {
-      return path.reduce (function(x, key) {
-        var obj = toObject (x);
+      return path.reduce ((x, key) => {
+        const obj = toObject (x);
         if (key in obj) return obj[key];
         throw new TypeError ('‘props’ expected object to have a property at ' +
                              show (path) + '; ' + show (x) + ' does not');
@@ -3607,7 +3603,7 @@
   _.props = {
     consts: {},
     types: [$.Array ($.String), a, b],
-    impl: props
+    impl: props,
   };
 
   //# get :: (Any -> Boolean) -> String -> a -> Maybe b
@@ -3640,7 +3636,7 @@
   _.get = {
     consts: {},
     types: [$.Predicate ($.Any), $.String, a, $.Maybe (b)],
-    impl: get
+    impl: get,
   };
 
   //# gets :: (Any -> Boolean) -> Array String -> a -> Maybe b
@@ -3664,16 +3660,17 @@
   function gets(pred) {
     return function(keys) {
       return function(x) {
-        return Z.filter (pred, keys.reduce (function(maybe, key) {
-          return Z.chain (get_ (key), maybe);
-        }, Just (x)));
+        return Z.filter (
+          pred,
+          keys.reduce ((maybe, key) => Z.chain (get_ (key), maybe), Just (x))
+        );
       };
     };
   }
   _.gets = {
     consts: {},
     types: [$.Predicate ($.Any), $.Array ($.String), a, $.Maybe (b)],
-    impl: gets
+    impl: gets,
   };
 
   //. ### StrMap
@@ -3713,7 +3710,7 @@
   _.value = {
     consts: {},
     types: [$.String, $.StrMap (a), $.Maybe (a)],
-    impl: value
+    impl: value,
   };
 
   //# singleton :: String -> a -> StrMap a
@@ -3727,7 +3724,7 @@
   //. ```
   function singleton(key) {
     return function(val) {
-      var strMap = {};
+      const strMap = {};
       strMap[key] = val;
       return strMap;
     };
@@ -3735,7 +3732,7 @@
   _.singleton = {
     consts: {},
     types: [$.String, a, $.StrMap (a)],
-    impl: singleton
+    impl: singleton,
   };
 
   //# insert :: String -> a -> StrMap a -> StrMap a
@@ -3764,7 +3761,7 @@
   _.insert = {
     consts: {},
     types: [$.String, a, $.StrMap (a), $.StrMap (a)],
-    impl: insert
+    impl: insert,
   };
 
   //# remove :: String -> StrMap a -> StrMap a
@@ -3785,7 +3782,7 @@
   //. ```
   function remove(key) {
     return function(strMap) {
-      var result = Z.concat (strMap, {});
+      const result = Z.concat (strMap, {});
       delete result[key];
       return result;
     };
@@ -3793,7 +3790,7 @@
   _.remove = {
     consts: {},
     types: [$.String, $.StrMap (a), $.StrMap (a)],
-    impl: remove
+    impl: remove,
   };
 
   //# keys :: StrMap a -> Array String
@@ -3807,7 +3804,7 @@
   _.keys = {
     consts: {},
     types: [$.StrMap (a), $.Array ($.String)],
-    impl: Object.keys
+    impl: Object.keys,
   };
 
   //# values :: StrMap a -> Array a
@@ -3819,12 +3816,12 @@
   //. [1, 2, 3]
   //. ```
   function values(strMap) {
-    return Z.map (function(k) { return strMap[k]; }, Object.keys (strMap));
+    return Z.map (k => strMap[k], Object.keys (strMap));
   }
   _.values = {
     consts: {},
     types: [$.StrMap (a), $.Array (a)],
-    impl: values
+    impl: values,
   };
 
   //# pairs :: StrMap a -> Array (Pair String a)
@@ -3836,13 +3833,12 @@
   //. [Pair ('a') (1), Pair ('b') (2), Pair ('c') (3)]
   //. ```
   function pairs(strMap) {
-    return Z.map (function(k) { return Pair (k) (strMap[k]); },
-                  Object.keys (strMap));
+    return Z.map (k => Pair (k) (strMap[k]), Object.keys (strMap));
   }
   _.pairs = {
     consts: {},
     types: [$.StrMap (a), $.Array ($.Pair ($.String) (a))],
-    impl: pairs
+    impl: pairs,
   };
 
   //# fromPairs :: Foldable f => f (Pair String a) -> StrMap a
@@ -3859,7 +3855,7 @@
   //. {x: 2}
   //. ```
   function fromPairs(pairs) {
-    return Z.reduce (function(strMap, pair) {
+    return Z.reduce ((strMap, pair) => {
       strMap[pair.fst] = pair.snd;
       return strMap;
     }, {}, pairs);
@@ -3867,7 +3863,7 @@
   _.fromPairs = {
     consts: {f: [Z.Foldable]},
     types: [f ($.Pair ($.String) (a)), $.StrMap (a)],
-    impl: fromPairs
+    impl: fromPairs,
   };
 
   //. ### Number
@@ -3889,7 +3885,7 @@
   _.negate = {
     consts: {},
     types: [$.ValidNumber, $.ValidNumber],
-    impl: negate
+    impl: negate,
   };
 
   //# add :: FiniteNumber -> FiniteNumber -> FiniteNumber
@@ -3908,7 +3904,7 @@
   _.add = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: add
+    impl: add,
   };
 
   //# sum :: Foldable f => f FiniteNumber -> FiniteNumber
@@ -3931,7 +3927,7 @@
   _.sum = {
     consts: {f: [Z.Foldable]},
     types: [f ($.FiniteNumber), $.FiniteNumber],
-    impl: reduce (add) (0)
+    impl: reduce (add) (0),
   };
 
   //# sub :: FiniteNumber -> FiniteNumber -> FiniteNumber
@@ -3950,7 +3946,7 @@
   _.sub = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: sub
+    impl: sub,
   };
 
   //# mult :: FiniteNumber -> FiniteNumber -> FiniteNumber
@@ -3969,7 +3965,7 @@
   _.mult = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: mult
+    impl: mult,
   };
 
   //# product :: Foldable f => f FiniteNumber -> FiniteNumber
@@ -3992,7 +3988,7 @@
   _.product = {
     consts: {f: [Z.Foldable]},
     types: [f ($.FiniteNumber), $.FiniteNumber],
-    impl: reduce (mult) (1)
+    impl: reduce (mult) (1),
   };
 
   //# div :: NonZeroFiniteNumber -> FiniteNumber -> FiniteNumber
@@ -4012,7 +4008,7 @@
   _.div = {
     consts: {},
     types: [$.NonZeroFiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: div
+    impl: div,
   };
 
   //# pow :: FiniteNumber -> FiniteNumber -> FiniteNumber
@@ -4034,7 +4030,7 @@
   _.pow = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: pow
+    impl: pow,
   };
 
   //. ### Integer
@@ -4056,7 +4052,7 @@
   _.even = {
     consts: {},
     types: [$.Integer, $.Boolean],
-    impl: even
+    impl: even,
   };
 
   //# odd :: Integer -> Boolean
@@ -4076,7 +4072,7 @@
   _.odd = {
     consts: {},
     types: [$.Integer, $.Boolean],
-    impl: odd
+    impl: odd,
   };
 
   //. ### Parse
@@ -4104,13 +4100,13 @@
   //. Nothing
   //. ```
   function parseDate(s) {
-    var date = new Date (s);
+    const date = new Date (s);
     return isNaN (date.valueOf ()) ? Nothing : Just (date);
   }
   _.parseDate = {
     consts: {},
     types: [$.String, $.Maybe ($.ValidDate)],
-    impl: parseDate
+    impl: parseDate,
   };
 
   //  requiredNonCapturingGroup :: Array String -> String
@@ -4124,7 +4120,7 @@
   }
 
   //  validFloatRepr :: RegExp
-  var validFloatRepr = new RegExp (
+  const validFloatRepr = new RegExp (
     '^' +                     // start-of-string anchor
     '\\s*' +                  // any number of leading whitespace characters
     '[+-]?' +                 // optional sign
@@ -4135,13 +4131,13 @@
         '[0-9]+',             // number
         '[0-9]+[.][0-9]+',    // number with interior decimal point
         '[0-9]+[.]',          // number with trailing decimal point
-        '[.][0-9]+'           // number with leading decimal point
+        '[.][0-9]+',          // number with leading decimal point
       ]) +
       optionalNonCapturingGroup ([
         '[Ee]' +              // "E" or "e"
         '[+-]?' +             // optional sign
-        '[0-9]+'              // exponent
-      ])
+        '[0-9]+',             // exponent
+      ]),
     ]) +
     '\\s*' +                  // any number of trailing whitespace characters
     '$'                       // end-of-string anchor
@@ -4165,15 +4161,15 @@
   _.parseFloat = {
     consts: {},
     types: [$.String, $.Maybe ($.Number)],
-    impl: parseFloat_
+    impl: parseFloat_,
   };
 
   //  Radix :: Type
-  var Radix = $.NullaryType
+  const Radix = $.NullaryType
     ('Radix')
     ('')
     ([$.Integer])
-    (function(x) { return x >= 2 && x <= 36; });
+    (x => x >= 2 && x <= 36);
 
   //# parseInt :: Radix -> String -> Maybe Integer
   //.
@@ -4198,12 +4194,12 @@
   //. ```
   function parseInt_(radix) {
     return function(s) {
-      var charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice (0, radix);
-      var pattern = new RegExp ('^[' + charset + ']+$', 'i');
+      const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice (0, radix);
+      const pattern = new RegExp ('^[' + charset + ']+$', 'i');
 
-      var t = s.replace (/^[+-]/, '');
+      const t = s.replace (/^[+-]/, '');
       if (pattern.test (radix === 16 ? t.replace (/^0x/i, '') : t)) {
-        var n = parseInt (s, radix);
+        const n = parseInt (s, radix);
         if ($.test ([]) ($.Integer) (n)) return Just (n);
       }
       return Nothing;
@@ -4212,7 +4208,7 @@
   _.parseInt = {
     consts: {},
     types: [Radix, $.String, $.Maybe ($.Integer)],
-    impl: parseInt_
+    impl: parseInt_,
   };
 
   //# parseJson :: (Any -> Boolean) -> String -> Maybe a
@@ -4242,15 +4238,15 @@
   _.parseJson = {
     consts: {},
     types: [$.Predicate ($.Any), $.String, $.Maybe (a)],
-    impl: parseJson
+    impl: parseJson,
   };
 
   //. ### RegExp
 
   //  withRegex :: (RegExp, () -> a) -> a
   function withRegex(pattern, thunk) {
-    var lastIndex = pattern.lastIndex;
-    var result = thunk ();
+    const lastIndex = pattern.lastIndex;
+    const result = thunk ();
     pattern.lastIndex = lastIndex;
     return result;
   }
@@ -4271,7 +4267,7 @@
   _.regex = {
     consts: {},
     types: [$.RegexFlags, $.String, $.RegExp],
-    impl: regex
+    impl: regex,
   };
 
   //# regexEscape :: String -> String
@@ -4294,7 +4290,7 @@
   _.regexEscape = {
     consts: {},
     types: [$.String, $.String],
-    impl: regexEscape
+    impl: regexEscape,
   };
 
   //# test :: RegExp -> String -> Boolean
@@ -4311,13 +4307,13 @@
   //. ```
   function test(pattern) {
     return function(s) {
-      return withRegex (pattern, function() { return pattern.test (s); });
+      return withRegex (pattern, () => pattern.test (s));
     };
   }
   _.test = {
     consts: {},
     types: [$.RegExp, $.String, $.Boolean],
-    impl: test
+    impl: test,
   };
 
   //# match :: NonGlobalRegExp -> String -> Maybe (Array (Maybe String))
@@ -4347,7 +4343,7 @@
   //. ```
   function match(pattern) {
     return function(s) {
-      return Z.map (function(m) { return Z.map (toMaybe, m.slice (1)); },
+      return Z.map (m => Z.map (toMaybe, m.slice (1)),
                     toMaybe (s.match (pattern)));
     };
     function toMaybe(x) { return x == null ? Nothing : Just (x); }
@@ -4357,7 +4353,7 @@
     types: [$.NonGlobalRegExp,
             $.String,
             $.Maybe ($.Array ($.Maybe ($.String)))],
-    impl: match
+    impl: match,
   };
 
   //# matchAll :: GlobalRegExp -> String -> Array (Array (Maybe String))
@@ -4377,21 +4373,21 @@
   //. [[Just ('foo')], [Just ('bar')], [Just ('baz')]]
   //. ```
   function matchAll(pattern) {
-    return function(s) {
-      return withRegex (pattern, function() {
-        return unfold (function(_) {
-          return Z.map (function(m) {
-            return Pair (Z.map (toMaybe, m.slice (1))) (null);
-          }, Z.reject (equals (null), Just (pattern.exec (s))));
-        }) ([]);
-      });
-    };
+    return s => (
+      withRegex (pattern, () => (
+        unfold (_ => (
+          Z.map (m => (
+            Pair (Z.map (toMaybe, m.slice (1))) (null)
+          ), Z.reject (equals (null), Just (pattern.exec (s))))
+        )) ([])
+      ))
+    );
     function toMaybe(x) { return x == null ? Nothing : Just (x); }
   }
   _.matchAll = {
     consts: {},
     types: [$.GlobalRegExp, $.String, $.Array ($.Array ($.Maybe ($.String)))],
-    impl: matchAll
+    impl: matchAll,
   };
 
   //# replace :: (Array (Maybe String) -> String) -> RegExp -> String -> String
@@ -4420,11 +4416,11 @@
   function replace(substitute) {
     return function(pattern) {
       return function(text) {
-        return text.replace (pattern, function() {
-          var groups = [];
-          var group, idx = 1;
+        return text.replace (pattern, (...args) => {
+          const groups = [];
+          let group, idx = 1;
           //  eslint-disable-next-line no-plusplus
-          while (typeof (group = arguments[idx++]) !== 'number') {
+          while (typeof (group = args[idx++]) !== 'number') {
             groups.push (group == null ? Nothing : Just (group));
           }
           return substitute (groups);
@@ -4438,7 +4434,7 @@
             $.RegExp,
             $.String,
             $.String],
-    impl: replace
+    impl: replace,
   };
 
   //. ### String
@@ -4456,7 +4452,7 @@
   _.toUpper = {
     consts: {},
     types: [$.String, $.String],
-    impl: invoke0 ('toUpperCase')
+    impl: invoke0 ('toUpperCase'),
   };
 
   //# toLower :: String -> String
@@ -4472,7 +4468,7 @@
   _.toLower = {
     consts: {},
     types: [$.String, $.String],
-    impl: invoke0 ('toLowerCase')
+    impl: invoke0 ('toLowerCase'),
   };
 
   //# trim :: String -> String
@@ -4486,7 +4482,7 @@
   _.trim = {
     consts: {},
     types: [$.String, $.String],
-    impl: invoke0 ('trim')
+    impl: invoke0 ('trim'),
   };
 
   //# stripPrefix :: String -> String -> Maybe String
@@ -4506,14 +4502,14 @@
   //. ```
   function stripPrefix(prefix) {
     return function(s) {
-      var idx = prefix.length;
+      const idx = prefix.length;
       return s.slice (0, idx) === prefix ? Just (s.slice (idx)) : Nothing;
     };
   }
   _.stripPrefix = {
     consts: {},
     types: [$.String, $.String, $.Maybe ($.String)],
-    impl: stripPrefix
+    impl: stripPrefix,
   };
 
   //# stripSuffix :: String -> String -> Maybe String
@@ -4533,14 +4529,14 @@
   //. ```
   function stripSuffix(suffix) {
     return function(s) {
-      var idx = s.length - suffix.length;  // value may be negative
+      const idx = s.length - suffix.length;  // value may be negative
       return s.slice (idx) === suffix ? Just (s.slice (0, idx)) : Nothing;
     };
   }
   _.stripSuffix = {
     consts: {},
     types: [$.String, $.String, $.Maybe ($.String)],
-    impl: stripSuffix
+    impl: stripSuffix,
   };
 
   //# words :: String -> Array String
@@ -4555,15 +4551,15 @@
   //. ['foo', 'bar', 'baz']
   //. ```
   function words(s) {
-    var words = s.split (/\s+/);
-    var len = words.length;
+    const words = s.split (/\s+/);
+    const len = words.length;
     return words.slice (words[0] === '' ? 1 : 0,
                         words[len - 1] === '' ? len - 1 : len);
   }
   _.words = {
     consts: {},
     types: [$.String, $.Array ($.String)],
-    impl: words
+    impl: words,
   };
 
   //# unwords :: Array String -> String
@@ -4580,7 +4576,7 @@
   _.unwords = {
     consts: {},
     types: [$.Array ($.String), $.String],
-    impl: invoke1 ('join') (' ')
+    impl: invoke1 ('join') (' '),
   };
 
   //# lines :: String -> Array String
@@ -4602,7 +4598,7 @@
   _.lines = {
     consts: {},
     types: [$.String, $.Array ($.String)],
-    impl: lines
+    impl: lines,
   };
 
   //# unlines :: Array String -> String
@@ -4617,12 +4613,12 @@
   //. 'foo\nbar\nbaz\n'
   //. ```
   function unlines(xs) {
-    return xs.reduce (function(s, x) { return s + x + '\n'; }, '');
+    return xs.reduce ((s, x) => s + x + '\n', '');
   }
   _.unlines = {
     consts: {},
     types: [$.Array ($.String), $.String],
-    impl: unlines
+    impl: unlines,
   };
 
   //# splitOn :: String -> String -> Array String
@@ -4639,7 +4635,7 @@
   _.splitOn = {
     consts: {},
     types: [$.String, $.String, $.Array ($.String)],
-    impl: invoke1 ('split')
+    impl: invoke1 ('split'),
   };
 
   //# splitOnRegex :: GlobalRegExp -> String -> Array String
@@ -4665,10 +4661,10 @@
   //. ```
   function splitOnRegex(pattern) {
     return function(s) {
-      return withRegex (pattern, function() {
-        var result = [];
-        var lastIndex = 0;
-        var match;
+      return withRegex (pattern, () => {
+        const result = [];
+        let lastIndex = 0;
+        let match;
         while ((match = pattern.exec (s)) != null) {
           if (pattern.lastIndex === lastIndex && match[0] === '') {
             if (pattern.lastIndex === s.length) return result;
@@ -4686,7 +4682,7 @@
   _.splitOnRegex = {
     consts: {},
     types: [$.GlobalRegExp, $.String, $.Array ($.String)],
-    impl: splitOnRegex
+    impl: splitOnRegex,
   };
 
   return create ({
@@ -4694,7 +4690,7 @@
                 || process == null
                 || process.env == null
                 || process.env.NODE_ENV !== 'production',
-    env: $.env
+    env: $.env,
   });
 
 }));
