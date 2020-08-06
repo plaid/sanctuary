@@ -623,7 +623,7 @@
   //. ```
   const type_ = x => {
     const r = type.parse (type (x));
-    r.namespace = Z.reject (equals (null), Just (r.namespace));
+    r.namespace = r.namespace == null ? Nothing : Just (r.namespace);
     return r;
   };
   _.type = {
