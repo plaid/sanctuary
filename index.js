@@ -409,9 +409,6 @@
   //  B :: (b -> c) -> (a -> b) -> a -> c
   const B = f => g => x => f (g (x));
 
-  //  C :: (a -> b -> c) -> b -> a -> c
-  const C = f => y => x => f (x) (y);
-
   //  curry2 :: ((a, b) -> c) -> a -> b -> c
   const curry2 = f => x => y => f (x, y);
 
@@ -1756,10 +1753,11 @@
   //. > S.fst (S.Pair ('foo') (42))
   //. 'foo'
   //. ```
+  const fst = pair => pair.fst;
   _.fst = {
     consts: {},
     types: [$.Pair (a) (b), a],
-    impl: pair (K),
+    impl: fst,
   };
 
   //# snd :: Pair a b -> b
@@ -1770,10 +1768,11 @@
   //. > S.snd (S.Pair ('foo') (42))
   //. 42
   //. ```
+  const snd = pair => pair.snd;
   _.snd = {
     consts: {},
     types: [$.Pair (a) (b), b],
-    impl: pair (C (K)),
+    impl: snd,
   };
 
   //# swap :: Pair a b -> Pair b a
@@ -1784,10 +1783,11 @@
   //. > S.swap (S.Pair ('foo') (42))
   //. Pair (42) ('foo')
   //. ```
+  const swap = pair => Pair (pair.snd) (pair.fst);
   _.swap = {
     consts: {},
     types: [$.Pair (a) (b), $.Pair (b) (a)],
-    impl: pair (C (Pair)),
+    impl: swap,
   };
 
   //. ### Maybe
@@ -1920,10 +1920,11 @@
   //. > S.fromMaybe (0) (S.Nothing)
   //. 0
   //. ```
+  const fromMaybe = x => maybe (x) (I);
   _.fromMaybe = {
     consts: {},
     types: [a, $.Maybe (a), a],
-    impl: C (maybe) (I),
+    impl: fromMaybe,
   };
 
   //# fromMaybe_ :: (() -> a) -> Maybe a -> a
@@ -1940,10 +1941,11 @@
   //. > S.fromMaybe_ (() => fib (30)) (S.Nothing)
   //. 832040
   //. ```
+  const fromMaybe_ = thunk => maybe_ (thunk) (I);
   _.fromMaybe_ = {
     consts: {},
     types: [$.Thunk (a), $.Maybe (a), a],
-    impl: C (maybe_) (I),
+    impl: fromMaybe_,
   };
 
   //# justs :: (Filterable f, Functor f) => f (Maybe a) -> f a
@@ -2214,7 +2216,7 @@
   //. > S.tagBy (S.odd) (1)
   //. Right (1)
   //. ```
-  const tagBy = pred => ifElse (pred) (Right) (Left);
+  const tagBy = pred => x => (pred (x) ? Right : Left) (x);
   _.tagBy = {
     consts: {},
     types: [$.Predicate (a), a, $.Either (a) (a)],
@@ -2393,7 +2395,7 @@
   //. > S.when (x => x >= 0) (Math.sqrt) (-1)
   //. -1
   //. ```
-  const when = pred => C (ifElse (pred)) (I);
+  const when = pred => f => x => pred (x) ? f (x) : x;
   _.when = {
     consts: {},
     types: [$.Predicate (a), $.Fn (a) (a), a, a],
@@ -2415,7 +2417,7 @@
   //. > S.unless (x => x < 0) (Math.sqrt) (-1)
   //. -1
   //. ```
-  const unless = pred => ifElse (pred) (I);
+  const unless = pred => f => x => pred (x) ? x : f (x);
   _.unless = {
     consts: {},
     types: [$.Predicate (a), $.Fn (a) (a), a, a],
