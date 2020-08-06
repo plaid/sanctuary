@@ -337,7 +337,7 @@
 //.
 //. ## API
 
-(function(f) {
+(f => {
 
   'use strict';
 
@@ -369,7 +369,7 @@
                         self.sanctuaryTypeIdentifiers);
   }
 
-} (($, Either, Maybe, Pair, show, Z, type) => {
+}) (($, Either, Maybe, Pair, show, Z, type) => {
 
   'use strict';
 
@@ -380,7 +380,7 @@
     var Nil = (__doctest.require ('./test/internal/List')).Nil;
     var Cons = (__doctest.require ('./test/internal/List')).Cons;
     var Sum = __doctest.require ('./test/internal/Sum');
-    var S = (function(S) {
+    var S = (S => {
       const S_ = S.create ({
         checkTypes: true,
         env: S.env.concat ([
@@ -390,7 +390,7 @@
       });
       S_.env = S.env;  // see S.env doctest
       return S_;
-    } (require ('.')));
+    }) (require ('.'));
     /* eslint-enable no-unused-vars, no-var */
   }
 
@@ -408,20 +408,12 @@
 
   //  B :: (b -> c) -> (a -> b) -> a -> c
   function B(f) {
-    return function(g) {
-      return function(x) {
-        return f (g (x));
-      };
-    };
+    return g => x => f (g (x));
   }
 
   //  C :: (a -> b -> c) -> b -> a -> c
   function C(f) {
-    return function(y) {
-      return function(x) {
-        return f (x) (y);
-      };
-    };
+    return y => x => f (x) (y);
   }
 
   //  curry2 :: ((a, b) -> c) -> a -> b -> c
@@ -464,18 +456,12 @@
 
   //  invoke0 :: String -> a -> b
   function invoke0(name) {
-    return function(target) {
-      return target[name] ();
-    };
+    return target => target[name] ();
   }
 
   //  invoke1 :: String -> a -> b -> c
   function invoke1(name) {
-    return function(x) {
-      return function(target) {
-        return target[name] (x);
-      };
-    };
+    return x => target => target[name] (x);
   }
 
   //  toObject :: a -> Object
@@ -506,16 +492,13 @@
   //  `Throwing e a b` is the type of functions from `a` to `b` that may
   //  throw values of type `e`.
   function Throwing(E) {
-    return function(A) {
-      return function(B) {
-        const T = $.Fn (A) (B);
-        T.format = function(outer, inner) {
-          return outer ('Throwing ' + show (E)) +
-                 outer (' ') + inner ('$1') (show (A)) +
-                 outer (' ') + inner ('$2') (show (B));
-        };
-        return T;
-      };
+    return A => B => {
+      const T = $.Fn (A) (B);
+      T.format = (outer, inner) =>
+        outer ('Throwing ' + show (E)) +
+        outer (' ') + inner ('$1') (show (A)) +
+        outer (' ') + inner ('$2') (show (B));
+      return T;
     };
   }
 
@@ -759,9 +742,7 @@
   //. false
   //. ```
   function equals(x) {
-    return function(y) {
-      return Z.equals (x, y);
-    };
+    return y => Z.equals (x, y);
   }
   _.equals = {
     consts: {a: [Z.Setoid]},
@@ -779,9 +760,7 @@
   //. [1, 2]
   //. ```
   function lt(y) {
-    return function(x) {
-      return Z.lt (x, y);
-    };
+    return x => Z.lt (x, y);
   }
   _.lt = {
     consts: {a: [Z.Ord]},
@@ -799,9 +778,7 @@
   //. [1, 2, 3]
   //. ```
   function lte(y) {
-    return function(x) {
-      return Z.lte (x, y);
-    };
+    return x => Z.lte (x, y);
   }
   _.lte = {
     consts: {a: [Z.Ord]},
@@ -819,9 +796,7 @@
   //. [4, 5]
   //. ```
   function gt(y) {
-    return function(x) {
-      return Z.gt (x, y);
-    };
+    return x => Z.gt (x, y);
   }
   _.gt = {
     consts: {a: [Z.Ord]},
@@ -839,9 +814,7 @@
   //. [3, 4, 5]
   //. ```
   function gte(y) {
-    return function(x) {
-      return Z.gte (x, y);
-    };
+    return x => Z.gte (x, y);
   }
   _.gte = {
     consts: {a: [Z.Ord]},
@@ -1017,9 +990,7 @@
   //. Just (1)
   //. ```
   function filter(pred) {
-    return function(filterable) {
-      return Z.filter (pred, filterable);
-    };
+    return filterable => Z.filter (pred, filterable);
   }
   _.filter = {
     consts: {f: [Z.Filterable]},
@@ -1051,9 +1022,7 @@
   //. Nothing
   //. ```
   function reject(pred) {
-    return function(filterable) {
-      return Z.reject (pred, filterable);
-    };
+    return filterable => Z.reject (pred, filterable);
   }
   _.reject = {
     consts: {f: [Z.Filterable]},
@@ -1097,9 +1066,7 @@
   //. 10
   //. ```
   function map(f) {
-    return function(functor) {
-      return Z.map (f, functor);
-    };
+    return functor => Z.map (f, functor);
   }
   _.map = {
     consts: {f: [Z.Functor]},
@@ -1136,9 +1103,7 @@
   //. Cons (1) (Cons (2) (Nil))
   //. ```
   function flip(functor) {
-    return function(x) {
-      return Z.flip (functor, x);
-    };
+    return x => Z.flip (functor, x);
   }
   _.flip = {
     consts: {f: [Z.Functor]},
@@ -1220,9 +1185,7 @@
   //. Right (1)
   //. ```
   function alt(y) {
-    return function(x) {
-      return Z.alt (x, y);
-    };
+    return x => Z.alt (x, y);
   }
   _.alt = {
     consts: {f: [Z.Alt]},
@@ -1270,11 +1233,9 @@
   //. [5, 4, 3, 2, 1]
   //. ```
   function reduce(f) {
-    return function(initial) {
-      return function(foldable) {
-        return Z.reduce ((y, x) => f (y) (x), initial, foldable);
-      };
-    };
+    return initial => foldable => Z.reduce ((y, x) => f (y) (x),
+                                            initial,
+                                            foldable);
   }
   _.reduce = {
     consts: {f: [Z.Foldable]},
@@ -1493,9 +1454,7 @@
   //. Right (42)
   //. ```
   function of(typeRep) {
-    return function(x) {
-      return Z.of (typeRep, x);
-    };
+    return x => Z.of (typeRep, x);
   }
   _.of = {
     consts: {f: [Z.Applicative]},
@@ -1576,10 +1535,8 @@
   //. ['oo!', 'oo?', 'on!', 'on?', 'no!', 'no?', 'nn!', 'nn?']
   //. ```
   function chainRec(typeRep) {
-    return function(f) {
-      return function(x) {
-        return Z.chainRec (typeRep, step, x);
-      };
+    return f => {
+      return x => Z.chainRec (typeRep, step, x);
       function step(next, done, x) {
         return Z.map (either (next) (done), f (x));
       }
@@ -1693,9 +1650,7 @@
   //. [42, 42, 42, 42, 42]
   //. ```
   function K(x) {
-    return function(y) {
-      return x;
-    };
+    return y => x;
   }
   _.K = {
     consts: {},
@@ -1717,9 +1672,7 @@
   //. [101, 10]
   //. ```
   function T(x) {
-    return function(f) {
-      return f (x);
-    };
+    return f => f (x);
   }
   _.T = {
     consts: {},
@@ -1765,9 +1718,7 @@
   //. 9
   //. ```
   function pipe(fs) {
-    return function(x) {
-      return reduce (T) (x) (fs);
-    };
+    return x => reduce (T) (x) (fs);
   }
   _.pipe = {
     consts: {f: [Z.Foldable]},
@@ -1790,9 +1741,7 @@
   //. Just (3)
   //. ```
   function pipeK(fs) {
-    return function(x) {
-      return Z.reduce ((x, f) => Z.chain (f, x), x, fs);
-    };
+    return x => Z.reduce ((x, f) => Z.chain (f, x), x, fs);
   }
   _.pipeK = {
     consts: {f: [Z.Foldable], m: [Z.Chain]},
@@ -1812,13 +1761,7 @@
   //. [3, 2, 1, 6, 5, 4]
   //. ```
   function on(f) {
-    return function(g) {
-      return function(x) {
-        return function(y) {
-          return f (g (x)) (g (y));
-        };
-      };
-    };
+    return g => x => y => f (g (x)) (g (y));
   }
   _.on = {
     consts: {},
@@ -1857,9 +1800,7 @@
   //. 'foobar'
   //. ```
   function pair(f) {
-    return function(pair) {
-      return f (pair.fst) (pair.snd);
-    };
+    return pair => f (pair.fst) (pair.snd);
   }
   _.pair = {
     consts: {},
@@ -1999,11 +1940,7 @@
   //. 0
   //. ```
   function maybe(x) {
-    return function(f) {
-      return function(maybe) {
-        return maybe.isJust ? f (maybe.value) : x;
-      };
-    };
+    return f => maybe => maybe.isJust ? f (maybe.value) : x;
   }
   _.maybe = {
     consts: {},
@@ -2026,11 +1963,7 @@
   //. 832040
   //. ```
   function maybe_(thunk) {
-    return function(f) {
-      return function(maybe) {
-        return maybe.isJust ? f (maybe.value) : thunk ();
-      };
-    };
+    return f => maybe => maybe.isJust ? f (maybe.value) : thunk ();
   }
   _.maybe_ = {
     consts: {},
@@ -2239,11 +2172,7 @@
   //. '42'
   //. ```
   function either(l) {
-    return function(r) {
-      return function(either) {
-        return (either.isLeft ? l : r) (either.value);
-      };
-    };
+    return r => either => (either.isLeft ? l : r) (either.value);
   }
   _.either = {
     consts: {},
@@ -2384,7 +2313,7 @@
   //. Left (new SyntaxError ('Unexpected end of JSON input'))
   //. ```
   function encase(f) {
-    return function(x) {
+    return x => {
       try {
         return Right (f (x));
       } catch (err) {
@@ -2418,9 +2347,7 @@
   //. true
   //. ```
   function and(x) {
-    return function(y) {
-      return x && y;
-    };
+    return y => x && y;
   }
   _.and = {
     consts: {},
@@ -2446,9 +2373,7 @@
   //. true
   //. ```
   function or(x) {
-    return function(y) {
-      return x || y;
-    };
+    return y => x || y;
   }
   _.or = {
     consts: {},
@@ -2511,11 +2436,7 @@
   //. 'yes'
   //. ```
   function boolean(x) {
-    return function(y) {
-      return function(b) {
-        return b ? y : x;
-      };
-    };
+    return y => b => b ? y : x;
   }
   _.boolean = {
     consts: {},
@@ -2541,13 +2462,7 @@
   //. 4
   //. ```
   function ifElse(pred) {
-    return function(f) {
-      return function(g) {
-        return function(x) {
-          return (pred (x) ? f : g) (x);
-        };
-      };
-    };
+    return f => g => x => (pred (x) ? f : g) (x);
   }
   _.ifElse = {
     consts: {},
@@ -2623,11 +2538,7 @@
   //. Just ([2, 3])
   //. ```
   function array(y) {
-    return function(f) {
-      return function(xs) {
-        return xs.length === 0 ? y : f (xs[0]) (xs.slice (1));
-      };
-    };
+    return f => xs => xs.length === 0 ? y : f (xs[0]) (xs.slice (1));
   }
   _.array = {
     consts: {},
@@ -2792,28 +2703,26 @@
   //. Just (Cons (1) (Cons (2) (Cons (3) (Nil))))
   //. ```
   function _takeDrop(arrayCase, generalCase) {
-    return function(n) {
-      return function(xs) {
-        if (n < 0) return Nothing;
+    return n => xs => {
+      if (n < 0) return Nothing;
 
-        //  Fast path for arrays.
-        if (Array.isArray (xs)) {
-          return n <= xs.length ? Just (arrayCase (n, xs)) : Nothing;
-        }
+      //  Fast path for arrays.
+      if (Array.isArray (xs)) {
+        return n <= xs.length ? Just (arrayCase (n, xs)) : Nothing;
+      }
 
-        //  m :: Maybe (Pair Integer (f a))
-        const m = Z.reduce (
-          (m, x) =>
-            Z.map (pair => {
-              const n = pair.fst;
-              const xs = pair.snd;
-              return Pair (n - 1) (generalCase (n, xs, x));
-            }, m),
-          Just (Pair (n) (Z.empty (xs.constructor))),
-          xs
-        );
-        return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
-      };
+      //  m :: Maybe (Pair Integer (f a))
+      const m = Z.reduce (
+        (m, x) =>
+          Z.map (pair => {
+            const n = pair.fst;
+            const xs = pair.snd;
+            return Pair (n - 1) (generalCase (n, xs, x));
+          }, m),
+        Just (Pair (n) (Z.empty (xs.constructor))),
+        xs
+      );
+      return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
     };
   }
   const take = _takeDrop (
@@ -2881,9 +2790,7 @@
   //. Just (Cons (2) (Cons (3) (Cons (4) (Nil))))
   //. ```
   function takeLast(n) {
-    return function(xs) {
-      return Z.map (Z.reverse, take (n) (Z.reverse (xs)));
-    };
+    return xs => Z.map (Z.reverse, take (n) (Z.reverse (xs)));
   }
   _.takeLast = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
@@ -2914,9 +2821,7 @@
   //. Just (Cons (1) (Nil))
   //. ```
   function dropLast(n) {
-    return function(xs) {
-      return Z.map (Z.reverse, drop (n) (Z.reverse (xs)));
-    };
+    return xs => Z.map (Z.reverse, drop (n) (Z.reverse (xs)));
   }
   _.dropLast = {
     consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
@@ -2939,7 +2844,7 @@
   //. []
   //. ```
   function takeWhile(pred) {
-    return function(xs) {
+    return xs => {
       let idx = 0;
       while (idx < xs.length && pred (xs[idx])) idx += 1;
       return xs.slice (0, idx);
@@ -2966,7 +2871,7 @@
   //. [3, 3, 3, 7, 6, 3, 5, 4]
   //. ```
   function dropWhile(pred) {
-    return function(xs) {
+    return xs => {
       let idx = 0;
       while (idx < xs.length && pred (xs[idx])) idx += 1;
       return xs.slice (idx);
@@ -3107,9 +3012,7 @@
   //. Just ([1, 2, 3])
   //. ```
   function append(x) {
-    return function(xs) {
-      return Z.append (x, xs);
-    };
+    return xs => Z.append (x, xs);
   }
   _.append = {
     consts: {f: [Z.Applicative, Z.Semigroup]},
@@ -3242,9 +3145,7 @@
   //. Just (10)
   //. ```
   function findMap(f) {
-    return function(xs) {
-      return Z.reduce ((m, x) => m.isJust ? m : f (x), Nothing, xs);
-    };
+    return xs => Z.reduce ((m, x) => m.isJust ? m : f (x), Nothing, xs);
   }
   _.findMap = {
     consts: {f: [Z.Foldable]},
@@ -3320,7 +3221,7 @@
   //. [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
   //. ```
   function unfold(f) {
-    return function(x) {
+    return x => {
       const result = [];
       for (let m = f (x); m.isJust; m = f (m.value.snd)) {
         result.push (m.value.fst);
@@ -3351,7 +3252,7 @@
   //. []
   //. ```
   function range(from) {
-    return function(to) {
+    return to => {
       const result = [];
       for (let n = from; n < to; n += 1) result.push (n);
       return result;
@@ -3384,7 +3285,7 @@
   //. [[2], [-3, 3, 3, 3], [4, -4], [4]]
   //. ```
   function groupBy(f) {
-    return function(xs) {
+    return xs => {
       if (xs.length === 0) return [];
       let x0 = xs[0];           // :: a
       let active = [x0];        // :: Array a
@@ -3531,15 +3432,13 @@
   //. [[1, 2], [3, 4]]
   //. ```
   function zipWith(f) {
-    return function(xs) {
-      return function(ys) {
-        const result = [];
-        const len = Math.min (xs.length, ys.length);
-        for (let idx = 0; idx < len; idx += 1) {
-          result.push (f (xs[idx]) (ys[idx]));
-        }
-        return result;
-      };
+    return xs => ys => {
+      const result = [];
+      const len = Math.min (xs.length, ys.length);
+      for (let idx = 0; idx < len; idx += 1) {
+        result.push (f (xs[idx]) (ys[idx]));
+      }
+      return result;
     };
   }
   _.zipWith = {
@@ -3564,7 +3463,7 @@
   //. 1
   //. ```
   function prop(key) {
-    return function(x) {
+    return x => {
       const obj = toObject (x);
       if (key in obj) return obj[key];
       throw new TypeError ('‘prop’ expected object to have a property named ' +
@@ -3591,14 +3490,13 @@
   //. 1
   //. ```
   function props(path) {
-    return function(x) {
-      return path.reduce ((x, key) => {
+    return x =>
+      path.reduce ((x, key) => {
         const obj = toObject (x);
         if (key in obj) return obj[key];
         throw new TypeError ('‘props’ expected object to have a property at ' +
                              show (path) + '; ' + show (x) + ' does not');
       }, x);
-    };
   }
   _.props = {
     consts: {},
@@ -3658,14 +3556,11 @@
   //. Nothing
   //. ```
   function gets(pred) {
-    return function(keys) {
-      return function(x) {
-        return Z.filter (
-          pred,
-          keys.reduce ((maybe, key) => Z.chain (get_ (key), maybe), Just (x))
-        );
-      };
-    };
+    return keys => x =>
+      Z.filter (
+        pred,
+        keys.reduce ((maybe, key) => Z.chain (get_ (key), maybe), Just (x))
+      );
   }
   _.gets = {
     consts: {},
@@ -3701,11 +3596,10 @@
   //. Nothing
   //. ```
   function value(key) {
-    return function(strMap) {
-      return Object.prototype.propertyIsEnumerable.call (strMap, key) ?
-             Just (strMap[key]) :
-             Nothing;
-    };
+    return strMap =>
+      Object.prototype.propertyIsEnumerable.call (strMap, key) ?
+      Just (strMap[key]) :
+      Nothing;
   }
   _.value = {
     consts: {},
@@ -3723,7 +3617,7 @@
   //. {foo: 42}
   //. ```
   function singleton(key) {
-    return function(val) {
+    return val => {
       const strMap = {};
       strMap[key] = val;
       return strMap;
@@ -3752,11 +3646,7 @@
   //. {a: 4, b: 2}
   //. ```
   function insert(key) {
-    return function(val) {
-      return function(strMap) {
-        return Z.concat (strMap, singleton (key) (val));
-      };
-    };
+    return val => strMap => Z.concat (strMap, singleton (key) (val));
   }
   _.insert = {
     consts: {},
@@ -3781,7 +3671,7 @@
   //. {}
   //. ```
   function remove(key) {
-    return function(strMap) {
+    return strMap => {
       const result = Z.concat (strMap, {});
       delete result[key];
       return result;
@@ -3897,9 +3787,7 @@
   //. 2
   //. ```
   function add(x) {
-    return function(y) {
-      return x + y;
-    };
+    return y => x + y;
   }
   _.add = {
     consts: {},
@@ -3939,9 +3827,7 @@
   //. [0, 1, 2]
   //. ```
   function sub(y) {
-    return function(x) {
-      return x - y;
-    };
+    return x => x - y;
   }
   _.sub = {
     consts: {},
@@ -3958,9 +3844,7 @@
   //. 8
   //. ```
   function mult(x) {
-    return function(y) {
-      return x * y;
-    };
+    return y => x * y;
   }
   _.mult = {
     consts: {},
@@ -4001,9 +3885,7 @@
   //. [0, 0.5, 1, 1.5]
   //. ```
   function div(y) {
-    return function(x) {
-      return x / y;
-    };
+    return x => x / y;
   }
   _.div = {
     consts: {},
@@ -4023,9 +3905,7 @@
   //. [1, 2, 3, 4, 5]
   //. ```
   function pow(exp) {
-    return function(base) {
-      return Math.pow (base, exp);
-    };
+    return base => Math.pow (base, exp);
   }
   _.pow = {
     consts: {},
@@ -4193,7 +4073,7 @@
   //. Nothing
   //. ```
   function parseInt_(radix) {
-    return function(s) {
+    return s => {
       const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice (0, radix);
       const pattern = new RegExp ('^[' + charset + ']+$', 'i');
 
@@ -4260,9 +4140,7 @@
   //. /:\d+:/g
   //. ```
   function regex(flags) {
-    return function(source) {
-      return new RegExp (source, flags);
-    };
+    return source => new RegExp (source, flags);
   }
   _.regex = {
     consts: {},
@@ -4306,9 +4184,7 @@
   //. false
   //. ```
   function test(pattern) {
-    return function(s) {
-      return withRegex (pattern, () => pattern.test (s));
-    };
+    return s => withRegex (pattern, () => pattern.test (s));
   }
   _.test = {
     consts: {},
@@ -4342,11 +4218,11 @@
   //. Just ([Just ('example.com'), Just ('8888')])
   //. ```
   function match(pattern) {
-    return function(s) {
-      return Z.map (m => Z.map (toMaybe, m.slice (1)),
-                    toMaybe (s.match (pattern)));
-    };
-    function toMaybe(x) { return x == null ? Nothing : Just (x); }
+    const toMaybe = x => x == null ? Nothing : Just (x);
+    return s => (
+      Z.map (m => Z.map (toMaybe, m.slice (1)),
+             toMaybe (s.match (pattern)))
+    );
   }
   _.match = {
     consts: {},
@@ -4373,16 +4249,17 @@
   //. [[Just ('foo')], [Just ('bar')], [Just ('baz')]]
   //. ```
   function matchAll(pattern) {
+    const toMaybe = x => x == null ? Nothing : Just (x);
     return s => (
-      withRegex (pattern, () => (
-        unfold (_ => (
-          Z.map (m => (
-            Pair (Z.map (toMaybe, m.slice (1))) (null)
-          ), Z.reject (equals (null), Just (pattern.exec (s))))
-        )) ([])
-      ))
+      withRegex (
+        pattern,
+        () => (
+          unfold (_ => Z.map (m => Pair (Z.map (toMaybe, m.slice (1))) (null),
+                              toMaybe (pattern.exec (s))))
+                 ([])
+        )
+      )
     );
-    function toMaybe(x) { return x == null ? Nothing : Just (x); }
   }
   _.matchAll = {
     consts: {},
@@ -4501,7 +4378,7 @@
   //. Nothing
   //. ```
   function stripPrefix(prefix) {
-    return function(s) {
+    return s => {
       const idx = prefix.length;
       return s.slice (0, idx) === prefix ? Just (s.slice (idx)) : Nothing;
     };
@@ -4528,7 +4405,7 @@
   //. Nothing
   //. ```
   function stripSuffix(suffix) {
-    return function(s) {
+    return s => {
       const idx = s.length - suffix.length;  // value may be negative
       return s.slice (idx) === suffix ? Just (s.slice (0, idx)) : Nothing;
     };
@@ -4660,24 +4537,22 @@
   //. ['foo', 'bar', 'baz']
   //. ```
   function splitOnRegex(pattern) {
-    return function(s) {
-      return withRegex (pattern, () => {
-        const result = [];
-        let lastIndex = 0;
-        let match;
-        while ((match = pattern.exec (s)) != null) {
-          if (pattern.lastIndex === lastIndex && match[0] === '') {
-            if (pattern.lastIndex === s.length) return result;
-            pattern.lastIndex += 1;
-          } else {
-            result.push (s.slice (lastIndex, match.index));
-            lastIndex = match.index + match[0].length;
-          }
+    return s => withRegex (pattern, () => {
+      const result = [];
+      let lastIndex = 0;
+      let match;
+      while ((match = pattern.exec (s)) != null) {
+        if (pattern.lastIndex === lastIndex && match[0] === '') {
+          if (pattern.lastIndex === s.length) return result;
+          pattern.lastIndex += 1;
+        } else {
+          result.push (s.slice (lastIndex, match.index));
+          lastIndex = match.index + match[0].length;
         }
-        result.push (s.slice (lastIndex));
-        return result;
-      });
-    };
+      }
+      result.push (s.slice (lastIndex));
+      return result;
+    });
   }
   _.splitOnRegex = {
     consts: {},
@@ -4693,7 +4568,7 @@
     env: $.env,
   });
 
-}));
+});
 
 //. [#438]:                     https://github.com/sanctuary-js/sanctuary/issues/438
 //. [#488]:                     https://github.com/sanctuary-js/sanctuary/issues/488
