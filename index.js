@@ -394,17 +394,8 @@
     /* eslint-enable no-unused-vars, no-var */
   }
 
-  //  Left :: a -> Either a b
-  const Left = Either.Left;
-
-  //  Right :: b -> Either a b
-  const Right = Either.Right;
-
-  //  Nothing :: Maybe a
-  const Nothing = Maybe.Nothing;
-
-  //  Just :: a -> Maybe a
-  const Just = Maybe.Just;
+  const {Left, Right} = Either;
+  const {Nothing, Just} = Maybe;
 
   //  B :: (b -> c) -> (a -> b) -> a -> c
   const B = f => g => x => f (g (x));
