@@ -424,14 +424,14 @@
   //
   //  `Throwing e a b` is the type of functions from `a` to `b` that may
   //  throw values of type `e`.
-  const Throwing = E => A => B => {
-    const T = $.Fn (A) (B);
-    T.format = (outer, inner) =>
-      outer ('Throwing ' + show (E)) +
-      outer (' ') + inner ('$1') (show (A)) +
-      outer (' ') + inner ('$2') (show (B));
-    return T;
-  };
+  const Throwing = E => A => B =>
+    Object.assign ($.Fn (A) (B), {
+      format: (outer, inner) => (
+        outer ('Throwing ' + show (E)) +
+        outer (' ') + inner ('$1') (show (A)) +
+        outer (' ') + inner ('$2') (show (B))
+      ),
+    });
 
   //  TypeRep :: Type -> Type
   const TypeRep = $.UnaryType
