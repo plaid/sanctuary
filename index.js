@@ -1738,7 +1738,7 @@
   //. > S.pair (S.concat) (S.Pair ('foo') ('bar'))
   //. 'foobar'
   //. ```
-  const pair = f => pair => f (pair.fst) (pair.snd);
+  const pair = f => ([fst, snd]) => f (fst) (snd);
   _.pair = {
     consts: {},
     types: [$.Fn (a) ($.Fn (b) (c)), $.Pair (a) (b), c],
@@ -1753,11 +1753,10 @@
   //. > S.fst (S.Pair ('foo') (42))
   //. 'foo'
   //. ```
-  const fst = pair => pair.fst;
   _.fst = {
     consts: {},
     types: [$.Pair (a) (b), a],
-    impl: fst,
+    impl: Pair.fst,
   };
 
   //# snd :: Pair a b -> b
@@ -1768,11 +1767,10 @@
   //. > S.snd (S.Pair ('foo') (42))
   //. 42
   //. ```
-  const snd = pair => pair.snd;
   _.snd = {
     consts: {},
     types: [$.Pair (a) (b), b],
-    impl: snd,
+    impl: Pair.snd,
   };
 
   //# swap :: Pair a b -> Pair b a
@@ -1783,11 +1781,10 @@
   //. > S.swap (S.Pair ('foo') (42))
   //. Pair (42) ('foo')
   //. ```
-  const swap = pair => Pair (pair.snd) (pair.fst);
   _.swap = {
     consts: {},
     types: [$.Pair (a) (b), $.Pair (b) (a)],
-    impl: swap,
+    impl: Pair.swap,
   };
 
   //. ### Maybe
@@ -2618,12 +2615,7 @@
 
     //  m :: Maybe (Pair Integer (f a))
     const m = Z.reduce (
-      (m, x) =>
-        Z.map (pair => {
-          const n = pair.fst;
-          const xs = pair.snd;
-          return Pair (n - 1) (generalCase (n, xs, x));
-        }, m),
+      (m, x) => Z.map (([n, xs]) => Pair (n - 1) (generalCase (n, xs, x)), m),
       Just (Pair (n) (Z.empty (xs.constructor))),
       xs
     );
@@ -3114,8 +3106,10 @@
   //. ```
   const unfold = f => x => {
     const result = [];
-    for (let m = f (x); m.isJust; m = f (m.value.snd)) {
-      result.push (m.value.fst);
+    for (let m = f (x); m.isJust;) {
+      const [fst, snd] = m.value;
+      result.push (fst);
+      m = f (snd);
     }
     return result;
   };
@@ -3615,8 +3609,8 @@
   //. {x: 2}
   //. ```
   const fromPairs = pairs => (
-    Z.reduce ((strMap, pair) => {
-      strMap[pair.fst] = pair.snd;
+    Z.reduce ((strMap, [fst, snd]) => {
+      strMap[fst] = snd;
       return strMap;
     }, {}, pairs)
   );
