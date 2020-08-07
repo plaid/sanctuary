@@ -439,19 +439,21 @@
     Contravariant,
   } = Z;
 
+  const curry2 = f => a => b => f (a, b);
+  const curry3 = f => a => b => c => f (a, b, c);
+  const curry4 = f => a => b => c => d => f (a, b, c, d);
+
   //  B :: (b -> c) -> (a -> b) -> a -> c
   const B = f => g => x => f (g (x));
 
-  //  curry2 :: ((a, b) -> c) -> a -> b -> c
-  const curry2 = f => x => y => f (x, y);
-
-  //  curry3 :: ((a, b, c) -> d) -> a -> b -> c -> d
-  const curry3 = f => x => y => z => f (x, y, z);
+  //  C :: (a -> b -> c) -> b -> a -> c
+  const C = f => y => x => f (x) (y);
 
   //  get_ :: String -> a -> Maybe b
-  const get_ = key => (
-    B (obj => key in obj ? Just (obj[key]) : Nothing) (toObject)
-  );
+  const get_ = name => x => {
+    const obj = toObject (x);
+    return name in obj ? Just (obj[name]) : Nothing;
+  };
 
   //  toObject :: a -> Object
   const toObject = x => x == null ? Object.create (null) : Object (x);
@@ -703,12 +705,11 @@
   //. > S.equals (S.Just ([1, 2, 3])) (S.Just ([1, 2, 4]))
   //. false
   //. ```
-  const equals = x => y => Z.equals (x, y);
   _.equals = {
     consts: {a: [Setoid]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
-    impl: equals,
+    impl: curry2 (Z.equals),
   };
 
   //# lt :: Ord a => a -> a -> Boolean
@@ -720,12 +721,11 @@
   //. > S.filter (S.lt (3)) ([1, 2, 3, 4, 5])
   //. [1, 2]
   //. ```
-  const lt = y => x => Z.lt (x, y);
   _.lt = {
     consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
-    impl: lt,
+    impl: C (curry2 (Z.lt)),
   };
 
   //# lte :: Ord a => a -> a -> Boolean
@@ -737,12 +737,11 @@
   //. > S.filter (S.lte (3)) ([1, 2, 3, 4, 5])
   //. [1, 2, 3]
   //. ```
-  const lte = y => x => Z.lte (x, y);
   _.lte = {
     consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
-    impl: lte,
+    impl: C (curry2 (Z.lte)),
   };
 
   //# gt :: Ord a => a -> a -> Boolean
@@ -754,12 +753,11 @@
   //. > S.filter (S.gt (3)) ([1, 2, 3, 4, 5])
   //. [4, 5]
   //. ```
-  const gt = y => x => Z.gt (x, y);
   _.gt = {
     consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
-    impl: gt,
+    impl: C (curry2 (Z.gt)),
   };
 
   //# gte :: Ord a => a -> a -> Boolean
@@ -771,12 +769,11 @@
   //. > S.filter (S.gte (3)) ([1, 2, 3, 4, 5])
   //. [3, 4, 5]
   //. ```
-  const gte = y => x => Z.gte (x, y);
   _.gte = {
     consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
-    impl: gte,
+    impl: C (curry2 (Z.gte)),
   };
 
   //# min :: Ord a => a -> a -> a
@@ -795,12 +792,11 @@
   //. > S.min ('10') ('2')
   //. '10'
   //. ```
-  const min = x => y => Z.min (x, y);
   _.min = {
     consts: {a: [Ord]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
-    impl: min,
+    impl: curry2 (Z.min),
   };
 
   //# max :: Ord a => a -> a -> a
@@ -819,12 +815,11 @@
   //. > S.max ('10') ('2')
   //. '2'
   //. ```
-  const max = x => y => Z.max (x, y);
   _.max = {
     consts: {a: [Ord]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
-    impl: max,
+    impl: curry2 (Z.max),
   };
 
   //# clamp :: Ord a => a -> a -> a -> a
@@ -844,12 +839,11 @@
   //. > S.clamp ('A') ('Z') ('~')
   //. 'Z'
   //. ```
-  const clamp = lower => upper => x => Z.clamp (lower, upper, x);
   _.clamp = {
     consts: {a: [Ord]},
     types: (a => [a, a, a, a])
            (TypeVariable ('a')),
-    impl: clamp,
+    impl: curry3 (Z.clamp),
   };
 
   //# id :: Category c => TypeRep c -> c
@@ -887,12 +881,11 @@
   //. > S.concat (Sum (18)) (Sum (24))
   //. Sum (42)
   //. ```
-  const concat = x => y => Z.concat (x, y);
   _.concat = {
     consts: {a: [Semigroup]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
-    impl: concat,
+    impl: curry2 (Z.concat),
   };
 
   //# empty :: Monoid a => TypeRep a -> a
@@ -957,13 +950,12 @@
   //. > S.filter (S.odd) (S.Just (1))
   //. Just (1)
   //. ```
-  const filter = pred => filterable => Z.filter (pred, filterable);
   _.filter = {
     consts: {f: [Filterable]},
     types: (f => a => [Predicate (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
-    impl: filter,
+    impl: curry2 (Z.filter),
   };
 
   //# reject :: Filterable f => (a -> Boolean) -> f a -> f a
@@ -989,13 +981,12 @@
   //. > S.reject (S.odd) (S.Just (1))
   //. Nothing
   //. ```
-  const reject = pred => filterable => Z.reject (pred, filterable);
   _.reject = {
     consts: {f: [Filterable]},
     types: (f => a => [Predicate (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
-    impl: reject,
+    impl: curry2 (Z.reject),
   };
 
   //# map :: Functor f => (a -> b) -> f a -> f b
@@ -1033,14 +1024,13 @@
   //. > S.map (Math.sqrt) (S.add (1)) (99)
   //. 10
   //. ```
-  const map = f => functor => Z.map (f, functor);
   _.map = {
     consts: {f: [Functor]},
     types: (f => a => b => [Fn (a) (b), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: map,
+    impl: curry2 (Z.map),
   };
 
   //# flip :: Functor f => f (a -> b) -> a -> f b
@@ -1071,14 +1061,13 @@
   //. > S.flip (Cons (Math.floor) (Cons (Math.ceil) (Nil))) (1.5)
   //. Cons (1) (Cons (2) (Nil))
   //. ```
-  const flip = functor => x => Z.flip (functor, x);
   _.flip = {
     consts: {f: [Functor]},
     types: (f => a => b => [f (Fn (a) (b)), a, f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: flip,
+    impl: curry2 (Z.flip),
   };
 
   //# bimap :: Bifunctor f => (a -> b) -> (c -> d) -> f a c -> f b d
@@ -1095,7 +1084,6 @@
   //. > S.bimap (S.toUpper) (Math.sqrt) (S.Right (64))
   //. Right (8)
   //. ```
-  const bimap = f => g => bifunctor => Z.bimap (f, g, bifunctor);
   _.bimap = {
     consts: {p: [Bifunctor]},
     types: (p => a => b => c => d =>
@@ -1105,7 +1093,7 @@
            (TypeVariable ('b'))
            (TypeVariable ('c'))
            (TypeVariable ('d')),
-    impl: bimap,
+    impl: curry3 (Z.bimap),
   };
 
   //# mapLeft :: Bifunctor f => (a -> b) -> f a c -> f b c
@@ -1123,7 +1111,6 @@
   //. > S.mapLeft (S.toUpper) (S.Right (64))
   //. Right (64)
   //. ```
-  const mapLeft = f => bifunctor => Z.mapLeft (f, bifunctor);
   _.mapLeft = {
     consts: {f: [Bifunctor]},
     types: (f => a => b => c => [Fn (a) (b), f (a) (c), f (b) (c)])
@@ -1131,7 +1118,7 @@
            (TypeVariable ('a'))
            (TypeVariable ('b'))
            (TypeVariable ('c')),
-    impl: mapLeft,
+    impl: curry2 (Z.mapLeft),
   };
 
   //# promap :: Profunctor p => (a -> b) -> (c -> d) -> p b c -> p a d
@@ -1142,7 +1129,6 @@
   //. > S.promap (Math.abs) (S.add (1)) (Math.sqrt) (-100)
   //. 11
   //. ```
-  const promap = f => g => profunctor => Z.promap (f, g, profunctor);
   _.promap = {
     consts: {p: [Profunctor]},
     types: (p => a => b => c => d =>
@@ -1152,7 +1138,7 @@
            (TypeVariable ('b'))
            (TypeVariable ('c'))
            (TypeVariable ('d')),
-    impl: promap,
+    impl: curry3 (Z.promap),
   };
 
   //# alt :: Alt f => f a -> f a -> f a
@@ -1173,13 +1159,12 @@
   //. > S.alt (S.Right (0)) (S.Right (1))
   //. Right (1)
   //. ```
-  const alt = y => x => Z.alt (x, y);
   _.alt = {
     consts: {f: [Alt]},
     types: (f => a => [f (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
-    impl: alt,
+    impl: C (curry2 (Z.alt)),
   };
 
   //# zero :: Plus f => TypeRep f -> f a
@@ -1253,7 +1238,7 @@
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: B (reduce) (flip),
+    impl: B (reduce) (C),
   };
 
   //# traverse :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)
@@ -1279,9 +1264,6 @@
   //. > S.traverse (S.Maybe) (S.parseInt (16)) ({a: 'A', b: 'B', c: 'C', x: 'X'})
   //. Nothing
   //. ```
-  const traverse = typeRep => f => traversable => (
-    Z.traverse (typeRep, f, traversable)
-  );
   _.traverse = {
     consts: {f: [Applicative], t: [Traversable]},
     types: (f => t => a => b =>
@@ -1290,7 +1272,7 @@
            (UnaryTypeVariable ('t'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: traverse,
+    impl: curry3 (Z.traverse),
   };
 
   //# sequence :: (Applicative f, Traversable t) => TypeRep f -> t (f a) -> f (t a)
@@ -1314,14 +1296,13 @@
   //. > S.sequence (S.Maybe) ({a: S.Just (1), b: S.Just (2), c: S.Nothing})
   //. Nothing
   //. ```
-  const sequence = typeRep => traversable => Z.sequence (typeRep, traversable);
   _.sequence = {
     consts: {f: [Applicative], t: [Traversable]},
     types: (f => t => a => [TypeRep (f (a)), t (f (a)), f (t (a))])
            (UnaryTypeVariable ('f'))
            (UnaryTypeVariable ('t'))
            (TypeVariable ('a')),
-    impl: sequence,
+    impl: curry2 (Z.sequence),
   };
 
   //# ap :: Apply f => f (a -> b) -> f a -> f b
@@ -1353,14 +1334,13 @@
   //. > S.ap (s => n => s.slice (0, n)) (s => Math.ceil (s.length / 2)) ('Haskell')
   //. 'Hask'
   //. ```
-  const ap = applyF => applyX => Z.ap (applyF, applyX);
   _.ap = {
     consts: {f: [Apply]},
     types: (f => a => b => [f (Fn (a) (b)), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: ap,
+    impl: curry2 (Z.ap),
   };
 
   //# lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
@@ -1381,7 +1361,6 @@
   //. > S.lift2 (S.and) (S.Just (true)) (S.Just (false))
   //. Just (false)
   //. ```
-  const lift2 = f => applyX => applyY => Z.lift2 (f, applyX, applyY);
   _.lift2 = {
     consts: {f: [Apply]},
     types: (f => a => b => c => [Fn (a) (Fn (b) (c)), f (a), f (b), f (c)])
@@ -1389,7 +1368,7 @@
            (TypeVariable ('a'))
            (TypeVariable ('b'))
            (TypeVariable ('c')),
-    impl: lift2,
+    impl: curry3 (Z.lift2),
   };
 
   //# lift3 :: Apply f => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
@@ -1404,9 +1383,6 @@
   //. > S.lift3 (S.reduce) (S.Just (S.add)) (S.Just (0)) (S.Nothing)
   //. Nothing
   //. ```
-  const lift3 = f => applyX => applyY => applyZ => (
-    Z.lift3 (f, applyX, applyY, applyZ)
-  );
   _.lift3 = {
     consts: {f: [Apply]},
     types: (f => a => b => c => d =>
@@ -1416,7 +1392,7 @@
            (TypeVariable ('b'))
            (TypeVariable ('c'))
            (TypeVariable ('d')),
-    impl: lift3,
+    impl: curry4 (Z.lift3),
   };
 
   //# apFirst :: Apply f => f a -> f b -> f a
@@ -1434,14 +1410,13 @@
   //. > S.apFirst (S.Just (1)) (S.Just (2))
   //. Just (1)
   //. ```
-  const apFirst = applyX => applyY => Z.apFirst (applyX, applyY);
   _.apFirst = {
     consts: {f: [Apply]},
     types: (f => a => b => [f (a), f (b), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: apFirst,
+    impl: curry2 (Z.apFirst),
   };
 
   //# apSecond :: Apply f => f a -> f b -> f b
@@ -1459,14 +1434,13 @@
   //. > S.apSecond (S.Just (1)) (S.Just (2))
   //. Just (2)
   //. ```
-  const apSecond = applyX => applyY => Z.apSecond (applyX, applyY);
   _.apSecond = {
     consts: {f: [Apply]},
     types: (f => a => b => [f (a), f (b), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: apSecond,
+    impl: curry2 (Z.apSecond),
   };
 
   //# of :: Applicative f => TypeRep f -> a -> f a
@@ -1486,13 +1460,12 @@
   //. > S.of (S.Either) (42)
   //. Right (42)
   //. ```
-  const of = typeRep => x => Z.of (typeRep, x);
   _.of = {
     consts: {f: [Applicative]},
     types: (f => a => [TypeRep (f (a)), a, f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
-    impl: of,
+    impl: curry2 (Z.of),
   };
 
   //# chain :: Chain m => (a -> m b) -> m a -> m b
@@ -1512,14 +1485,13 @@
   //. > S.chain (S.parseInt (10)) (S.Just ('XXX'))
   //. Nothing
   //. ```
-  const chain = f => chain => Z.chain (f, chain);
   _.chain = {
     consts: {m: [Chain]},
     types: (m => a => b => [Fn (a) (m (b)), m (a), m (b)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: chain,
+    impl: curry2 (Z.chain),
   };
 
   //# join :: Chain m => m (m a) -> m a
@@ -1598,14 +1570,13 @@
   //. > S.extend (f => f ([3, 4])) (S.reverse) ([1, 2])
   //. [4, 3, 2, 1]
   //. ```
-  const extend = f => extend => Z.extend (f, extend);
   _.extend = {
     consts: {w: [Extend]},
     types: (w => a => b => [Fn (w (a)) (b), w (a), w (b)])
            (UnaryTypeVariable ('w'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: extend,
+    impl: curry2 (Z.extend),
   };
 
   //# duplicate :: Extend w => w a -> w (w a)
@@ -1658,14 +1629,13 @@
   //. > S.contramap (s => s.length) (Math.sqrt) ('Sanctuary')
   //. 3
   //. ```
-  const contramap = f => contravariant => Z.contramap (f, contravariant);
   _.contramap = {
     consts: {f: [Contravariant]},
     types: (f => a => b => [Fn (b) (a), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: contramap,
+    impl: curry2 (Z.contramap),
   };
 
   //. ### Combinator
@@ -2054,12 +2024,11 @@
   //. > S.fromMaybe (0) (S.Nothing)
   //. 0
   //. ```
-  const fromMaybe = x => maybe (x) (I);
   _.fromMaybe = {
     consts: {},
     types: (a => [a, $.Maybe (a), a])
            (TypeVariable ('a')),
-    impl: fromMaybe,
+    impl: C (maybe) (I),
   };
 
   //# fromMaybe_ :: (() -> a) -> Maybe a -> a
@@ -2076,12 +2045,11 @@
   //. > S.fromMaybe_ (() => fib (30)) (S.Nothing)
   //. 832040
   //. ```
-  const fromMaybe_ = thunk => maybe_ (thunk) (I);
   _.fromMaybe_ = {
     consts: {},
     types: (a => [Thunk (a), $.Maybe (a), a])
            (TypeVariable ('a')),
-    impl: fromMaybe_,
+    impl: C (maybe_) (I),
   };
 
   //# justs :: (Filterable f, Functor f) => f (Maybe a) -> f a
@@ -2095,7 +2063,9 @@
   //. > S.justs ([S.Just ('foo'), S.Nothing, S.Just ('baz')])
   //. ['foo', 'baz']
   //. ```
-  const justs = maybes => map (j => j.value) (filter (isJust) (maybes));
+  const justs = maybes => (
+    Z.map (j => j.value, Z.filter (isJust, maybes))
+  );
   _.justs = {
     consts: {f: [Filterable, Functor]},
     types: (f => a => [f ($.Maybe (a)), f (a)])
@@ -2118,13 +2088,16 @@
   //. > S.mapMaybe (S.head) ({x: [1, 2, 3], y: [], z: [4, 5, 6]})
   //. {x: 1, z: 4}
   //. ```
+  const mapMaybe = f => functor => (
+    Z.map (j => j.value, Z.filter (isJust, Z.map (f, functor)))
+  );
   _.mapMaybe = {
     consts: {f: [Filterable, Functor]},
     types: (f => a => b => [Fn (a) ($.Maybe (b)), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: B (B (justs)) (map),
+    impl: mapMaybe,
   };
 
   //# maybeToNullable :: Maybe a -> Nullable a
@@ -2337,7 +2310,9 @@
   //. > S.lefts ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])
   //. ['foo', 'bar']
   //. ```
-  const lefts = eithers => map (l => l.value) (filter (isLeft) (eithers));
+  const lefts = eithers => (
+    Z.map (l => l.value, Z.filter (isLeft, eithers))
+  );
   _.lefts = {
     consts: {f: [Filterable, Functor]},
     types: (f => a => b => [f ($.Either (a) (b)), f (a)])
@@ -2358,7 +2333,9 @@
   //. > S.rights ([S.Right (20), S.Left ('foo'), S.Right (10), S.Left ('bar')])
   //. [20, 10]
   //. ```
-  const rights = eithers => map (r => r.value) (filter (isRight) (eithers));
+  const rights = eithers => (
+    Z.map (r => r.value, Z.filter (isRight, eithers))
+  );
   _.rights = {
     consts: {f: [Filterable, Functor]},
     types: (f => a => b => [f ($.Either (a) (b)), f (b)])
@@ -2719,9 +2696,11 @@
       return foldable.length > 0 ? Just (foldable.slice (1)) : Nothing;
     }
     const empty = Z.empty (foldable.constructor);
-    return Z.reduce ((m, x) => Just (maybe (empty) (append (x)) (m)),
-                     Nothing,
-                     foldable);
+    return Z.reduce (
+      (m, x) => Just (m.isNothing ? empty : Z.append (x, m.value)),
+      Nothing,
+      foldable
+    );
   };
   _.tail = {
     consts: {f: [Applicative, Foldable, Monoid]},
@@ -2757,9 +2736,14 @@
     const empty = Z.empty (foldable.constructor);
     return Z.map (
       Pair.snd,
-      Z.reduce ((m, x) => Just (Pair (x) (maybe (empty) (pair (append)) (m))),
-                Nothing,
-                foldable)
+      Z.reduce (
+        (m, x) => {
+          const xs = m.isNothing ? empty : Z.append (m.value.fst, m.value.snd);
+          return Just (Pair (x) (xs));
+        },
+        Nothing,
+        foldable
+      )
     );
   };
   _.init = {
@@ -2806,7 +2790,7 @@
       Just (Pair (n) (Z.empty (xs.constructor))),
       xs
     );
-    return Z.map (Pair.snd, Z.reject (B (gt (0)) (Pair.fst), m));
+    return Z.map (Pair.snd, Z.reject (([n]) => n > 0, m));
   };
   const take = _takeDrop (
     (n, xs) => xs.slice (0, n),
@@ -3104,13 +3088,12 @@
   //. > S.append ([3]) (S.Just ([1, 2]))
   //. Just ([1, 2, 3])
   //. ```
-  const append = x => xs => Z.append (x, xs);
   _.append = {
     consts: {f: [Applicative, Semigroup]},
     types: (f => a => [a, f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
-    impl: append,
+    impl: curry2 (Z.append),
   };
 
   //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
@@ -3644,7 +3627,9 @@
   //. > S.get (S.is ($.Array ($.Number))) ('x') ({x: [1, 2, 3, null]})
   //. Nothing
   //. ```
-  const get = pred => B (B (filter (pred))) (get_);
+  const get = pred => name => x => (
+    Z.filter (pred, get_ (name) (x))
+  );
   _.get = {
     consts: {},
     types: (a => b => [Predicate (Any), $.String, a, $.Maybe (b)])
@@ -3671,10 +3656,10 @@
   //. > S.gets (S.is ($.Number)) (['a', 'b', 'c']) ({})
   //. Nothing
   //. ```
-  const gets = pred => keys => x => (
+  const gets = pred => names => x => (
     Z.filter (
       pred,
-      keys.reduce ((maybe, key) => Z.chain (get_ (key), maybe), Just (x))
+      names.reduce ((maybe, name) => Z.chain (get_ (name), maybe), Just (x))
     )
   );
   _.gets = {
@@ -4203,8 +4188,8 @@
   //. > S.parseJson (S.is ($.Array ($.Integer))) ('[1,2,3]')
   //. Just ([1, 2, 3])
   //. ```
-  const parseJson = pred => (
-    B (filter (pred)) (B (either (K (Nothing)) (Just)) (encase (JSON.parse)))
+  const parseJson = pred => s => (
+    Z.filter (pred, either (K (Nothing)) (Just) (encase (JSON.parse) (s)))
   );
   _.parseJson = {
     consts: {},
@@ -4214,6 +4199,7 @@
   };
 
   //. ### RegExp
+
 
   //  toMaybe :: a? -> Maybe a
   const toMaybe = x => x == null ? Nothing : Just (x);
