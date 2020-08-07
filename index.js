@@ -535,20 +535,15 @@
   //. ```
   //.
   //. See also [`env`](#env).
-  const create = opts => {
-    const def = $.create (opts);
-    const S = {
-      env: opts.env,
-      is: def ('is') ({}) ([Type, Any, $.Boolean]) ($.test (opts.env)),
-      Maybe: Maybe,
-      Nothing: Nothing,
-      Either: Either,
-    };
+  const create = ({checkTypes, env}) => {
+    const def = $.create ({checkTypes, env});
+    const is = def ('is') ({}) ([Type, Any, $.Boolean]) ($.test (env));
+    const S = {env, is, Maybe, Nothing, Either};
     (Object.keys (_)).forEach (name => {
-      S[name] = def (name) (_[name].consts) (_[name].types) (_[name].impl);
+      const {consts, types, impl} = _[name];
+      S[name] = def (name) (consts) (types) (impl);
     });
-    S.unchecked = opts.checkTypes ? create ({checkTypes: false, env: opts.env})
-                                  : S;
+    S.unchecked = checkTypes ? create ({checkTypes: false, env}) : S;
     return S;
   };
   _.create = {
