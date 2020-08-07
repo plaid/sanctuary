@@ -414,6 +414,31 @@
     Predicate,
   } = $;
 
+  const {
+    Setoid,
+    Ord,
+    Semigroupoid,
+    Category,
+    Semigroup,
+    Monoid,
+    Group,
+    Filterable,
+    Functor,
+    Bifunctor,
+    Profunctor,
+    Apply,
+    Applicative,
+    Chain,
+    ChainRec,
+    Alt,
+    Plus,
+    Foldable,
+    Traversable,
+    Extend,
+    Comonad,
+    Contravariant,
+  } = Z;
+
   //  B :: (b -> c) -> (a -> b) -> a -> c
   const B = f => g => x => f (g (x));
 
@@ -683,7 +708,7 @@
   //. ```
   const equals = x => y => Z.equals (x, y);
   _.equals = {
-    consts: {a: [Z.Setoid]},
+    consts: {a: [Setoid]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
     impl: equals,
@@ -700,7 +725,7 @@
   //. ```
   const lt = y => x => Z.lt (x, y);
   _.lt = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
     impl: lt,
@@ -717,7 +742,7 @@
   //. ```
   const lte = y => x => Z.lte (x, y);
   _.lte = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
     impl: lte,
@@ -734,7 +759,7 @@
   //. ```
   const gt = y => x => Z.gt (x, y);
   _.gt = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
     impl: gt,
@@ -751,7 +776,7 @@
   //. ```
   const gte = y => x => Z.gte (x, y);
   _.gte = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, $.Boolean])
            (TypeVariable ('a')),
     impl: gte,
@@ -775,7 +800,7 @@
   //. ```
   const min = x => y => Z.min (x, y);
   _.min = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
     impl: min,
@@ -799,7 +824,7 @@
   //. ```
   const max = x => y => Z.max (x, y);
   _.max = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
     impl: max,
@@ -824,7 +849,7 @@
   //. ```
   const clamp = lower => upper => x => Z.clamp (lower, upper, x);
   _.clamp = {
-    consts: {a: [Z.Ord]},
+    consts: {a: [Ord]},
     types: (a => [a, a, a, a])
            (TypeVariable ('a')),
     impl: clamp,
@@ -839,7 +864,7 @@
   //. 42
   //. ```
   _.id = {
-    consts: {c: [Z.Category]},
+    consts: {c: [Category]},
     types: (c => [TypeRep (c), c])
            (TypeVariable ('c')),
     impl: Z.id,
@@ -867,7 +892,7 @@
   //. ```
   const concat = x => y => Z.concat (x, y);
   _.concat = {
-    consts: {a: [Z.Semigroup]},
+    consts: {a: [Semigroup]},
     types: (a => [a, a, a])
            (TypeVariable ('a')),
     impl: concat,
@@ -891,7 +916,7 @@
   //. Sum (0)
   //. ```
   _.empty = {
-    consts: {a: [Z.Monoid]},
+    consts: {a: [Monoid]},
     types: (a => [TypeRep (a), a])
            (TypeVariable ('a')),
     impl: Z.empty,
@@ -906,7 +931,7 @@
   //. Sum (-5)
   //. ```
   _.invert = {
-    consts: {g: [Z.Group]},
+    consts: {g: [Group]},
     types: (g => [g, g])
            (TypeVariable ('g')),
     impl: Z.invert,
@@ -937,7 +962,7 @@
   //. ```
   const filter = pred => filterable => Z.filter (pred, filterable);
   _.filter = {
-    consts: {f: [Z.Filterable]},
+    consts: {f: [Filterable]},
     types: (f => a => [Predicate (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -969,7 +994,7 @@
   //. ```
   const reject = pred => filterable => Z.reject (pred, filterable);
   _.reject = {
-    consts: {f: [Z.Filterable]},
+    consts: {f: [Filterable]},
     types: (f => a => [Predicate (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -1013,7 +1038,7 @@
   //. ```
   const map = f => functor => Z.map (f, functor);
   _.map = {
-    consts: {f: [Z.Functor]},
+    consts: {f: [Functor]},
     types: (f => a => b => [Fn (a) (b), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1051,7 +1076,7 @@
   //. ```
   const flip = functor => x => Z.flip (functor, x);
   _.flip = {
-    consts: {f: [Z.Functor]},
+    consts: {f: [Functor]},
     types: (f => a => b => [f (Fn (a) (b)), a, f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1075,7 +1100,7 @@
   //. ```
   const bimap = f => g => bifunctor => Z.bimap (f, g, bifunctor);
   _.bimap = {
-    consts: {p: [Z.Bifunctor]},
+    consts: {p: [Bifunctor]},
     types: (p => a => b => c => d =>
               [Fn (a) (b), Fn (c) (d), p (a) (c), p (b) (d)])
            (BinaryTypeVariable ('p'))
@@ -1103,7 +1128,7 @@
   //. ```
   const mapLeft = f => bifunctor => Z.mapLeft (f, bifunctor);
   _.mapLeft = {
-    consts: {f: [Z.Bifunctor]},
+    consts: {f: [Bifunctor]},
     types: (f => a => b => c => [Fn (a) (b), f (a) (c), f (b) (c)])
            (BinaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1122,7 +1147,7 @@
   //. ```
   const promap = f => g => profunctor => Z.promap (f, g, profunctor);
   _.promap = {
-    consts: {p: [Z.Profunctor]},
+    consts: {p: [Profunctor]},
     types: (p => a => b => c => d =>
               [Fn (a) (b), Fn (c) (d), p (b) (c), p (a) (d)])
            (BinaryTypeVariable ('p'))
@@ -1153,7 +1178,7 @@
   //. ```
   const alt = y => x => Z.alt (x, y);
   _.alt = {
-    consts: {f: [Z.Alt]},
+    consts: {f: [Alt]},
     types: (f => a => [f (a), f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -1175,7 +1200,7 @@
   //. Nothing
   //. ```
   _.zero = {
-    consts: {f: [Z.Plus]},
+    consts: {f: [Plus]},
     types: (f => a => [TypeRep (f (a)), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -1205,7 +1230,7 @@
     Z.reduce ((y, x) => f (y) (x), initial, foldable)
   );
   _.reduce = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => b => [Fn (b) (Fn (a) (b)), b, f (a), b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1226,7 +1251,7 @@
   //. [3, 2, 1]
   //. ```
   _.reduce_ = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => b => [Fn (a) (Fn (b) (b)), b, f (a), b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1261,7 +1286,7 @@
     Z.traverse (typeRep, f, traversable)
   );
   _.traverse = {
-    consts: {f: [Z.Applicative], t: [Z.Traversable]},
+    consts: {f: [Applicative], t: [Traversable]},
     types: (f => t => a => b =>
               [TypeRep (f (b)), Fn (a) (f (b)), t (a), f (t (b))])
            (UnaryTypeVariable ('f'))
@@ -1294,7 +1319,7 @@
   //. ```
   const sequence = typeRep => traversable => Z.sequence (typeRep, traversable);
   _.sequence = {
-    consts: {f: [Z.Applicative], t: [Z.Traversable]},
+    consts: {f: [Applicative], t: [Traversable]},
     types: (f => t => a => [TypeRep (f (a)), t (f (a)), f (t (a))])
            (UnaryTypeVariable ('f'))
            (UnaryTypeVariable ('t'))
@@ -1333,7 +1358,7 @@
   //. ```
   const ap = applyF => applyX => Z.ap (applyF, applyX);
   _.ap = {
-    consts: {f: [Z.Apply]},
+    consts: {f: [Apply]},
     types: (f => a => b => [f (Fn (a) (b)), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1361,7 +1386,7 @@
   //. ```
   const lift2 = f => applyX => applyY => Z.lift2 (f, applyX, applyY);
   _.lift2 = {
-    consts: {f: [Z.Apply]},
+    consts: {f: [Apply]},
     types: (f => a => b => c => [Fn (a) (Fn (b) (c)), f (a), f (b), f (c)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1386,7 +1411,7 @@
     Z.lift3 (f, applyX, applyY, applyZ)
   );
   _.lift3 = {
-    consts: {f: [Z.Apply]},
+    consts: {f: [Apply]},
     types: (f => a => b => c => d =>
               [Fn (a) (Fn (b) (Fn (c) (d))), f (a), f (b), f (c), f (d)])
            (UnaryTypeVariable ('f'))
@@ -1414,7 +1439,7 @@
   //. ```
   const apFirst = applyX => applyY => Z.apFirst (applyX, applyY);
   _.apFirst = {
-    consts: {f: [Z.Apply]},
+    consts: {f: [Apply]},
     types: (f => a => b => [f (a), f (b), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1439,7 +1464,7 @@
   //. ```
   const apSecond = applyX => applyY => Z.apSecond (applyX, applyY);
   _.apSecond = {
-    consts: {f: [Z.Apply]},
+    consts: {f: [Apply]},
     types: (f => a => b => [f (a), f (b), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1466,7 +1491,7 @@
   //. ```
   const of = typeRep => x => Z.of (typeRep, x);
   _.of = {
-    consts: {f: [Z.Applicative]},
+    consts: {f: [Applicative]},
     types: (f => a => [TypeRep (f (a)), a, f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -1492,7 +1517,7 @@
   //. ```
   const chain = f => chain => Z.chain (f, chain);
   _.chain = {
-    consts: {m: [Z.Chain]},
+    consts: {m: [Chain]},
     types: (m => a => b => [Fn (a) (m (b)), m (a), m (b)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
@@ -1531,7 +1556,7 @@
   //. 'abcabc'
   //. ```
   _.join = {
-    consts: {m: [Z.Chain]},
+    consts: {m: [Chain]},
     types: (m => a => [m (m (a)), m (a)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a')),
@@ -1556,7 +1581,7 @@
     return x => Z.chainRec (typeRep, step, x);
   };
   _.chainRec = {
-    consts: {m: [Z.ChainRec]},
+    consts: {m: [ChainRec]},
     types: (m => a => b =>
               [TypeRep (m (b)), Fn (a) (m ($.Either (a) (b))), a, m (b)])
            (UnaryTypeVariable ('m'))
@@ -1578,7 +1603,7 @@
   //. ```
   const extend = f => extend => Z.extend (f, extend);
   _.extend = {
-    consts: {w: [Z.Extend]},
+    consts: {w: [Extend]},
     types: (w => a => b => [Fn (w (a)) (b), w (a), w (b)])
            (UnaryTypeVariable ('w'))
            (TypeVariable ('a'))
@@ -1605,7 +1630,7 @@
   //. [4, 3, 2, 1]
   //. ```
   _.duplicate = {
-    consts: {w: [Z.Extend]},
+    consts: {w: [Extend]},
     types: (w => a => [w (a), w (w (a))])
            (UnaryTypeVariable ('w'))
            (TypeVariable ('a')),
@@ -1621,7 +1646,7 @@
   //. 'bar'
   //. ```
   _.extract = {
-    consts: {w: [Z.Comonad]},
+    consts: {w: [Comonad]},
     types: (w => a => [w (a), a])
            (UnaryTypeVariable ('w'))
            (TypeVariable ('a')),
@@ -1638,7 +1663,7 @@
   //. ```
   const contramap = f => contravariant => Z.contramap (f, contravariant);
   _.contramap = {
-    consts: {f: [Z.Contravariant]},
+    consts: {f: [Contravariant]},
     types: (f => a => b => [Fn (b) (a), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1727,7 +1752,7 @@
   //. 10
   //. ```
   _.compose = {
-    consts: {s: [Z.Semigroupoid]},
+    consts: {s: [Semigroupoid]},
     types: (s => a => b => c => [s (b) (c), s (a) (b), s (a) (c)])
            (BinaryTypeVariable ('s'))
            (TypeVariable ('a'))
@@ -1751,7 +1776,7 @@
   //. ```
   const pipe = fs => x => reduce (T) (x) (fs);
   _.pipe = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => b => [f (Fn (Any) (Any)), a, b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -1775,7 +1800,7 @@
   //. ```
   const pipeK = fs => x => Z.reduce ((x, f) => Z.chain (f, x), x, fs);
   _.pipeK = {
-    consts: {f: [Z.Foldable], m: [Z.Chain]},
+    consts: {f: [Foldable], m: [Chain]},
     types: (f => m => a => b => [f (Fn (Any) (m (Any))), m (a), m (b)])
            (UnaryTypeVariable ('f'))
            (UnaryTypeVariable ('m'))
@@ -2075,7 +2100,7 @@
   //. ```
   const justs = maybes => map (j => j.value) (filter (isJust) (maybes));
   _.justs = {
-    consts: {f: [Z.Filterable, Z.Functor]},
+    consts: {f: [Filterable, Functor]},
     types: (f => a => [f ($.Maybe (a)), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2097,7 +2122,7 @@
   //. {x: 1, z: 4}
   //. ```
   _.mapMaybe = {
-    consts: {f: [Z.Filterable, Z.Functor]},
+    consts: {f: [Filterable, Functor]},
     types: (f => a => b => [Fn (a) ($.Maybe (b)), f (a), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -2317,7 +2342,7 @@
   //. ```
   const lefts = eithers => map (l => l.value) (filter (isLeft) (eithers));
   _.lefts = {
-    consts: {f: [Z.Filterable, Z.Functor]},
+    consts: {f: [Filterable, Functor]},
     types: (f => a => b => [f ($.Either (a) (b)), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -2338,7 +2363,7 @@
   //. ```
   const rights = eithers => map (r => r.value) (filter (isRight) (eithers));
   _.rights = {
-    consts: {f: [Z.Filterable, Z.Functor]},
+    consts: {f: [Filterable, Functor]},
     types: (f => a => b => [f ($.Either (a) (b)), f (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -2632,7 +2657,7 @@
     return Z.reduce ((m, x) => m.isJust ? m : Just (x), Nothing, foldable);
   };
   _.head = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [f (a), $.Maybe (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2666,7 +2691,7 @@
     return Z.reduce ((_, x) => Just (x), Nothing, foldable);
   };
   _.last = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [f (a), $.Maybe (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2702,7 +2727,7 @@
                      foldable);
   };
   _.tail = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2741,7 +2766,7 @@
     );
   };
   _.init = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2791,7 +2816,7 @@
     (n, xs, x) => n > 0 ? Z.append (x, xs) : xs
   );
   _.take = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2825,7 +2850,7 @@
     (n, xs, x) => n > 0 ? xs : Z.append (x, xs)
   );
   _.drop = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2856,7 +2881,7 @@
   //. ```
   const takeLast = n => xs => Z.map (Z.reverse, take (n) (Z.reverse (xs)));
   _.takeLast = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2887,7 +2912,7 @@
   //. ```
   const dropLast = n => xs => Z.map (Z.reverse, drop (n) (Z.reverse (xs)));
   _.dropLast = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2973,7 +2998,7 @@
   //. 1
   //. ```
   _.size = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [f (a), NonNegativeInteger])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -2998,7 +3023,7 @@
   //. false
   //. ```
   _.all = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [Predicate (a), f (a), $.Boolean])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3023,7 +3048,7 @@
   //. true
   //. ```
   _.any = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [Predicate (a), f (a), $.Boolean])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3056,7 +3081,7 @@
   //. false
   //. ```
   _.none = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [Predicate (a), f (a), $.Boolean])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3084,7 +3109,7 @@
   //. ```
   const append = x => xs => Z.append (x, xs);
   _.append = {
-    consts: {f: [Z.Applicative, Z.Semigroup]},
+    consts: {f: [Applicative, Semigroup]},
     types: (f => a => [a, f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3111,7 +3136,7 @@
   //. Just ([1, 2, 3])
   //. ```
   _.prepend = {
-    consts: {f: [Z.Applicative, Z.Semigroup]},
+    consts: {f: [Applicative, Semigroup]},
     types: (f => a => [a, f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3170,7 +3195,7 @@
   //. false
   //. ```
   _.elem = {
-    consts: {a: [Z.Setoid], f: [Z.Foldable]},
+    consts: {a: [Setoid], f: [Foldable]},
     types: (f => a => [a, f (a), $.Boolean])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3194,7 +3219,7 @@
   //. ```
   const find = pred => findMap (x => pred (x) ? Just (x) : Nothing);
   _.find = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [Predicate (a), f (a), $.Maybe (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3224,7 +3249,7 @@
     Z.reduce ((m, x) => m.isJust ? m : f (x), Nothing, xs)
   );
   _.findMap = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => b => [Fn (a) ($.Maybe (b)), f (a), $.Maybe (b)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -3260,7 +3285,7 @@
   //. [1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 6, 0, 0, 0, 7, 8, 0, 0, 0, 9]
   //. ```
   _.intercalate = {
-    consts: {a: [Z.Monoid], f: [Z.Foldable]},
+    consts: {a: [Monoid], f: [Foldable]},
     types: (f => a => [a, f (a), a])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3280,7 +3305,7 @@
   //. [11, 12, 21, 22, 31, 32]
   //. ```
   _.foldMap = {
-    consts: {b: [Z.Monoid], f: [Z.Foldable]},
+    consts: {b: [Monoid], f: [Foldable]},
     types: (f => a => b => [TypeRep (b), Fn (a) (b), f (a), b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
@@ -3401,7 +3426,7 @@
   //. 'cba'
   //. ```
   _.reverse = {
-    consts: {f: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [f (a), f (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3427,7 +3452,7 @@
   //. [Left (2), Left (4), Right (1), Right (3)]
   //. ```
   _.sort = {
-    consts: {a: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {a: [Ord], m: [Applicative, Foldable, Monoid]},
     types: (m => a => [m (a), m (a)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a')),
@@ -3477,7 +3502,7 @@
   //. [121, 117, 116, 114, 110, 99, 97, 97, 83]
   //. ```
   _.sortBy = {
-    consts: {b: [Z.Ord], m: [Z.Applicative, Z.Foldable, Z.Monoid]},
+    consts: {b: [Ord], m: [Applicative, Foldable, Monoid]},
     types: (m => a => b => [Fn (a) (b), m (a), m (a)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
@@ -3846,7 +3871,7 @@
     }, {}, pairs)
   );
   _.fromPairs = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => a => [f ($.Pair ($.String) (a)), StrMap (a)])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
@@ -3906,7 +3931,7 @@
   //. 0
   //. ```
   _.sum = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => [f ($.FiniteNumber), $.FiniteNumber])
            (UnaryTypeVariable ('f')),
     impl: reduce (add) (0),
@@ -3960,7 +3985,7 @@
   //. 1
   //. ```
   _.product = {
-    consts: {f: [Z.Foldable]},
+    consts: {f: [Foldable]},
     types: (f => [f ($.FiniteNumber), $.FiniteNumber])
            (UnaryTypeVariable ('f')),
     impl: reduce (mult) (1),
