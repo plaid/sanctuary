@@ -44,10 +44,7 @@
         "window": false
       },
       "rules": {
-        "comma-dangle": ["error", "always-multiline"],
-        "func-style": ["error", "declaration", {"allowArrowFunctions": true}],
         "indent": ["off"],
-        "no-eval": ["off"],
         "no-extra-semi": ["off"],
         "no-unused-vars": ["error", {"args": "none", "varsIgnorePattern": "^([$]|S)$"}]
       }
