@@ -375,23 +375,22 @@
 
   /* istanbul ignore if */
   if (typeof __doctest !== 'undefined') {
-    /* eslint-disable no-unused-vars, no-var */
+    const {create, env} = __doctest.require ('.');
+    const List = __doctest.require ('./test/internal/List');
+    // eslint-disable-next-line no-var, no-unused-vars
     var Descending = __doctest.require ('sanctuary-descending');
-    var Nil = (__doctest.require ('./test/internal/List')).Nil;
-    var Cons = (__doctest.require ('./test/internal/List')).Cons;
+    // eslint-disable-next-line no-var, no-unused-vars
+    var {Nil, Cons} = List;
+    // eslint-disable-next-line no-var
     var Sum = __doctest.require ('./test/internal/Sum');
-    var S = (S => {
-      const S_ = S.create ({
+    // eslint-disable-next-line no-var, no-unused-vars
+    var S = Object.assign (
+      create ({
         checkTypes: true,
-        env: S.env.concat ([
-          (__doctest.require ('./test/internal/List')).Type ($.Unknown),
-          Sum.Type,
-        ]),
-      });
-      S_.env = S.env;  // see S.env doctest
-      return S_;
-    }) (require ('.'));
-    /* eslint-enable no-unused-vars, no-var */
+        env: env.concat ([List.Type ($.Unknown), Sum.Type]),
+      }),
+      {env}  // see S.env doctest
+    );
   }
 
   const {Left, Right} = Either;
