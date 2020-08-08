@@ -631,12 +631,10 @@
   };
   _.type = {
     consts: {},
-    types: [
-      Any,
-      RecordType ({namespace: $.Maybe ($.String),
-                   name: $.String,
-                   version: NonNegativeInteger}),
-    ],
+    types: [Any,
+            RecordType ({namespace: $.Maybe ($.String),
+                         name: $.String,
+                         version: NonNegativeInteger})],
     impl: type_,
   };
 
