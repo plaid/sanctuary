@@ -373,35 +373,21 @@
 
   'use strict';
 
-  /* istanbul ignore if */
-  if (typeof __doctest !== 'undefined') {
-    const {create, env} = __doctest.require ('.');
-    const List = __doctest.require ('./test/internal/List');
-    // eslint-disable-next-line no-var, no-unused-vars
-    var Descending = __doctest.require ('sanctuary-descending');
-    // eslint-disable-next-line no-var, no-unused-vars
-    var {Nil, Cons} = List;
-    // eslint-disable-next-line no-var
-    var Sum = __doctest.require ('./test/internal/Sum');
-    // eslint-disable-next-line no-var, no-unused-vars
-    var S = Object.assign (
-      create ({
-        checkTypes: true,
-        env: env.concat ([List.Type ($.Unknown), Sum.Type]),
-      }),
-      {env}  // see S.env doctest
-    );
-  }
-
-  const {Left, Right} = Either;
-  const {Nothing, Just} = Maybe;
-
   const {
+    Unknown,
     Any,
+    ValidDate,
     Fn,
+    Nullable,
+    ValidNumber,
+    FiniteNumber,
+    NonZeroFiniteNumber,
     Integer,
     NonNegativeInteger,
+    GlobalRegExp,
+    NonGlobalRegExp,
     StrMap,
+    RegexFlags,
     Type,
     NullaryType,
     UnaryType,
@@ -412,6 +398,22 @@
     Thunk,
     Predicate,
   } = $;
+
+  const {
+    Left,
+    Right,
+  } = Either;
+
+  const {
+    Nothing,
+    Just,
+  } = Maybe;
+
+  const {
+    fst,
+    snd,
+    swap,
+  } = Pair;
 
   const {
     Setoid,
@@ -437,6 +439,26 @@
     Comonad,
     Contravariant,
   } = Z;
+
+  /* istanbul ignore if */
+  if (typeof __doctest !== 'undefined') {
+    const {create, env} = __doctest.require ('.');
+    const List = __doctest.require ('./test/internal/List');
+    // eslint-disable-next-line no-var, no-unused-vars
+    var Descending = __doctest.require ('sanctuary-descending');
+    // eslint-disable-next-line no-var, no-unused-vars
+    var {Nil, Cons} = List;
+    // eslint-disable-next-line no-var
+    var Sum = __doctest.require ('./test/internal/Sum');
+    // eslint-disable-next-line no-var, no-unused-vars
+    var S = Object.assign (
+      create ({
+        checkTypes: true,
+        env: env.concat ([List.Type (Unknown), Sum.Type]),
+      }),
+      {env}  // see S.env doctest
+    );
+  }
 
   const curry2 = f => a => b => f (a, b);
   const curry3 = f => a => b => c => f (a, b, c);
@@ -555,8 +577,11 @@
   };
   _.create = {
     consts: {},
-    types: (Options => [Options, $.Object])
-           (RecordType ({checkTypes: $.Boolean, env: $.Array (Any)})),
+    types: (Boolean => Array => Object =>
+              [RecordType ({checkTypes: Boolean, env: Array (Any)}), Object])
+           ($.Boolean)
+           ($.Array)
+           ($.Object),
     impl: create,
   };
 
@@ -637,10 +662,13 @@
   };
   _.type = {
     consts: {},
-    types: [Any,
-            RecordType ({namespace: $.Maybe ($.String),
-                         name: $.String,
-                         version: NonNegativeInteger})],
+    types: (Maybe => String =>
+              [Any,
+               RecordType ({namespace: Maybe (String),
+                            name: String,
+                            version: NonNegativeInteger})])
+           ($.Maybe)
+           ($.String),
     impl: type_,
   };
 
@@ -678,7 +706,8 @@
   //. ```
   _.show = {
     consts: {},
-    types: [Any, $.String],
+    types: (String => [Any, String])
+           ($.String),
     impl: show,
   };
 
@@ -710,7 +739,8 @@
   //. ```
   _.equals = {
     consts: {a: [Setoid]},
-    types: (a => [a, a, $.Boolean])
+    types: (Boolean => a => [a, a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: curry2 (Z.equals),
   };
@@ -726,7 +756,8 @@
   //. ```
   _.lt = {
     consts: {a: [Ord]},
-    types: (a => [a, a, $.Boolean])
+    types: (Boolean => a => [a, a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: C (curry2 (Z.lt)),
   };
@@ -742,7 +773,8 @@
   //. ```
   _.lte = {
     consts: {a: [Ord]},
-    types: (a => [a, a, $.Boolean])
+    types: (Boolean => a => [a, a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: C (curry2 (Z.lte)),
   };
@@ -758,7 +790,8 @@
   //. ```
   _.gt = {
     consts: {a: [Ord]},
-    types: (a => [a, a, $.Boolean])
+    types: (Boolean => a => [a, a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: C (curry2 (Z.gt)),
   };
@@ -774,7 +807,8 @@
   //. ```
   _.gte = {
     consts: {a: [Ord]},
-    types: (a => [a, a, $.Boolean])
+    types: (Boolean => a => [a, a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: C (curry2 (Z.gte)),
   };
@@ -1560,8 +1594,9 @@
   };
   _.chainRec = {
     consts: {m: [ChainRec]},
-    types: (m => a => b =>
-              [TypeRep (m (b)), Fn (a) (m ($.Either (a) (b))), a, m (b)])
+    types: (Either => m => a => b =>
+              [TypeRep (m (b)), Fn (a) (m (Either (a) (b))), a, m (b)])
+           ($.Either)
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
@@ -1827,7 +1862,8 @@
   //. ```
   _.Pair = {
     consts: {},
-    types: (a => b => [a, b, $.Pair (a) (b)])
+    types: (Pair => a => b => [a, b, Pair (a) (b)])
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: Pair,
@@ -1846,7 +1882,8 @@
   );
   _.pair = {
     consts: {},
-    types: (a => b => c => [Fn (a) (Fn (b) (c)), $.Pair (a) (b), c])
+    types: (Pair => a => b => c => [Fn (a) (Fn (b) (c)), Pair (a) (b), c])
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b'))
            (TypeVariable ('c')),
@@ -1863,10 +1900,11 @@
   //. ```
   _.fst = {
     consts: {},
-    types: (a => b => [$.Pair (a) (b), a])
+    types: (Pair => a => b => [Pair (a) (b), a])
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: Pair.fst,
+    impl: fst,
   };
 
   //# snd :: Pair a b -> b
@@ -1879,10 +1917,11 @@
   //. ```
   _.snd = {
     consts: {},
-    types: (a => b => [$.Pair (a) (b), b])
+    types: (Pair => a => b => [Pair (a) (b), b])
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: Pair.snd,
+    impl: snd,
   };
 
   //# swap :: Pair a b -> Pair b a
@@ -1895,10 +1934,11 @@
   //. ```
   _.swap = {
     consts: {},
-    types: (a => b => [$.Pair (a) (b), $.Pair (b) (a)])
+    types: (Pair => a => b => [Pair (a) (b), Pair (b) (a)])
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: Pair.swap,
+    impl: swap,
   };
 
   //. ### Maybe
@@ -1931,7 +1971,8 @@
   //. ```
   _.Just = {
     consts: {},
-    types: (a => [a, $.Maybe (a)])
+    types: (Maybe => a => [a, Maybe (a)])
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: Just,
   };
@@ -1952,7 +1993,9 @@
   );
   _.isNothing = {
     consts: {},
-    types: (a => [$.Maybe (a), $.Boolean])
+    types: (Maybe => Boolean => a => [Maybe (a), Boolean])
+           ($.Maybe)
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: isNothing,
   };
@@ -1973,7 +2016,9 @@
   );
   _.isJust = {
     consts: {},
-    types: (a => [$.Maybe (a), $.Boolean])
+    types: (Maybe => Boolean => a => [Maybe (a), Boolean])
+           ($.Maybe)
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: isJust,
   };
@@ -1998,7 +2043,8 @@
   );
   _.maybe = {
     consts: {},
-    types: (a => b => [b, Fn (a) (b), $.Maybe (a), b])
+    types: (Maybe => a => b => [b, Fn (a) (b), Maybe (a), b])
+           ($.Maybe)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: maybe,
@@ -2023,7 +2069,8 @@
   );
   _.maybe_ = {
     consts: {},
-    types: (a => b => [Thunk (b), Fn (a) (b), $.Maybe (a), b])
+    types: (Maybe => a => b => [Thunk (b), Fn (a) (b), Maybe (a), b])
+           ($.Maybe)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: maybe_,
@@ -2046,7 +2093,8 @@
   //. ```
   _.fromMaybe = {
     consts: {},
-    types: (a => [a, $.Maybe (a), a])
+    types: (Maybe => a => [a, Maybe (a), a])
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: C (maybe) (I),
   };
@@ -2067,7 +2115,8 @@
   //. ```
   _.fromMaybe_ = {
     consts: {},
-    types: (a => [Thunk (a), $.Maybe (a), a])
+    types: (Maybe => a => [Thunk (a), Maybe (a), a])
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: C (maybe_) (I),
   };
@@ -2088,7 +2137,8 @@
   );
   _.justs = {
     consts: {f: [Filterable, Functor]},
-    types: (f => a => [f ($.Maybe (a)), f (a)])
+    types: (Maybe => f => a => [f (Maybe (a)), f (a)])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: justs,
@@ -2113,7 +2163,8 @@
   );
   _.mapMaybe = {
     consts: {f: [Filterable, Functor]},
-    types: (f => a => b => [Fn (a) ($.Maybe (b)), f (a), f (b)])
+    types: (Maybe => f => a => b => [Fn (a) (Maybe (b)), f (a), f (b)])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
@@ -2139,7 +2190,8 @@
   );
   _.maybeToNullable = {
     consts: {},
-    types: (a => [$.Maybe (a), $.Nullable (a)])
+    types: (Maybe => a => [Maybe (a), Nullable (a)])
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: maybeToNullable,
   };
@@ -2166,7 +2218,8 @@
   //. ```
   _.Left = {
     consts: {},
-    types: (a => b => [a, $.Either (a) (b)])
+    types: (Either => a => b => [a, Either (a) (b)])
+           ($.Either)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: Left,
@@ -2182,7 +2235,8 @@
   //. ```
   _.Right = {
     consts: {},
-    types: (a => b => [b, $.Either (a) (b)])
+    types: (Either => a => b => [b, Either (a) (b)])
+           ($.Either)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: Right,
@@ -2204,7 +2258,9 @@
   );
   _.isLeft = {
     consts: {},
-    types: (a => b => [$.Either (a) (b), $.Boolean])
+    types: (Either => Boolean => a => b => [Either (a) (b), Boolean])
+           ($.Either)
+           ($.Boolean)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: isLeft,
@@ -2226,7 +2282,9 @@
   );
   _.isRight = {
     consts: {},
-    types: (a => b => [$.Either (a) (b), $.Boolean])
+    types: (Either => Boolean => a => b => [Either (a) (b), Boolean])
+           ($.Either)
+           ($.Boolean)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: isRight,
@@ -2253,7 +2311,9 @@
   );
   _.either = {
     consts: {},
-    types: (a => b => c => [Fn (a) (c), Fn (b) (c), $.Either (a) (b), c])
+    types: (Either => a => b => c =>
+              [Fn (a) (c), Fn (b) (c), Either (a) (b), c])
+           ($.Either)
            (TypeVariable ('a'))
            (TypeVariable ('b'))
            (TypeVariable ('c')),
@@ -2279,7 +2339,8 @@
   );
   _.fromLeft = {
     consts: {},
-    types: (a => b => [a, $.Either (a) (b), a])
+    types: (Either => a => b => [a, Either (a) (b), a])
+           ($.Either)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: fromLeft,
@@ -2304,7 +2365,8 @@
   );
   _.fromRight = {
     consts: {},
-    types: (a => b => [b, $.Either (a) (b), b])
+    types: (Either => a => b => [b, Either (a) (b), b])
+           ($.Either)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: fromRight,
@@ -2326,7 +2388,8 @@
   //. ```
   _.fromEither = {
     consts: {},
-    types: (a => [$.Either (a) (a), a])
+    types: (Either => a => [Either (a) (a), a])
+           ($.Either)
            (TypeVariable ('a')),
     impl: either (I) (I),
   };
@@ -2347,7 +2410,8 @@
   );
   _.lefts = {
     consts: {f: [Filterable, Functor]},
-    types: (f => a => b => [f ($.Either (a) (b)), f (a)])
+    types: (Either => f => a => b => [f (Either (a) (b)), f (a)])
+           ($.Either)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
@@ -2370,7 +2434,8 @@
   );
   _.rights = {
     consts: {f: [Filterable, Functor]},
-    types: (f => a => b => [f ($.Either (a) (b)), f (b)])
+    types: (Either => f => a => b => [f (Either (a) (b)), f (b)])
+           ($.Either)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
@@ -2394,7 +2459,8 @@
   );
   _.tagBy = {
     consts: {},
-    types: (a => [Predicate (a), a, $.Either (a) (a)])
+    types: (Either => a => [Predicate (a), a, Either (a) (a)])
+           ($.Either)
            (TypeVariable ('a')),
     impl: tagBy,
   };
@@ -2419,7 +2485,8 @@
   };
   _.encase = {
     consts: {},
-    types: (e => a => b => [Throwing (e) (a) (b), a, $.Either (e) (b)])
+    types: (Either => e => a => b => [Throwing (e) (a) (b), a, Either (e) (b)])
+           ($.Either)
            (TypeVariable ('e'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
@@ -2450,7 +2517,8 @@
   );
   _.and = {
     consts: {},
-    types: [$.Boolean, $.Boolean, $.Boolean],
+    types: (Boolean => [Boolean, Boolean, Boolean])
+           ($.Boolean),
     impl: and,
   };
 
@@ -2476,7 +2544,8 @@
   );
   _.or = {
     consts: {},
-    types: [$.Boolean, $.Boolean, $.Boolean],
+    types: (Boolean => [Boolean, Boolean, Boolean])
+           ($.Boolean),
     impl: or,
   };
 
@@ -2498,7 +2567,8 @@
   );
   _.not = {
     consts: {},
-    types: [$.Boolean, $.Boolean],
+    types: (Boolean => [Boolean, Boolean])
+           ($.Boolean),
     impl: not,
   };
 
@@ -2518,7 +2588,8 @@
   //. ```
   _.complement = {
     consts: {},
-    types: (a => [Predicate (a), a, $.Boolean])
+    types: (Boolean => a => [Predicate (a), a, Boolean])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: B (not),
   };
@@ -2540,7 +2611,8 @@
   );
   _.boolean = {
     consts: {},
-    types: (a => [a, a, $.Boolean, a])
+    types: (Boolean => a => [a, a, Boolean, a])
+           ($.Boolean)
            (TypeVariable ('a')),
     impl: boolean,
   };
@@ -2647,7 +2719,8 @@
   );
   _.array = {
     consts: {},
-    types: (a => b => [b, Fn (a) (Fn ($.Array (a)) (b)), $.Array (a), b])
+    types: (Array => a => b => [b, Fn (a) (Fn (Array (a)) (b)), Array (a), b])
+           ($.Array)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: array,
@@ -2680,7 +2753,8 @@
   };
   _.head = {
     consts: {f: [Foldable]},
-    types: (f => a => [f (a), $.Maybe (a)])
+    types: (Maybe => f => a => [f (a), Maybe (a)])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: head,
@@ -2714,7 +2788,8 @@
   };
   _.last = {
     consts: {f: [Foldable]},
-    types: (f => a => [f (a), $.Maybe (a)])
+    types: (Maybe => f => a => [f (a), Maybe (a)])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: last,
@@ -2752,7 +2827,8 @@
   };
   _.tail = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: tail,
@@ -2783,7 +2859,7 @@
     }
     const empty = Z.empty (foldable.constructor);
     return Z.map (
-      Pair.snd,
+      snd,
       Z.reduce (
         (m, x) => {
           const xs = m.isNothing ? empty : Z.append (m.value.fst, m.value.snd);
@@ -2796,7 +2872,8 @@
   };
   _.init = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: init,
@@ -2828,7 +2905,7 @@
     n < 0 ? Nothing :
     Array.isArray (xs) ? n <= xs.length ? Just (xs.slice (0, n)) : Nothing :
     Z.map (
-      Pair.snd,
+      snd,
       Z.reject (
         ([n]) => n > 0,
         Z.reduce (
@@ -2846,7 +2923,8 @@
   );
   _.take = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [Integer, f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [Integer, f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: take,
@@ -2878,7 +2956,7 @@
     n < 0 ? Nothing :
     Array.isArray (xs) ? n <= xs.length ? Just (xs.slice (n)) : Nothing :
     Z.map (
-      Pair.snd,
+      snd,
       Z.reject (
         ([n]) => n > 0,
         Z.reduce (
@@ -2896,7 +2974,8 @@
   );
   _.drop = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [Integer, f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [Integer, f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: drop,
@@ -2929,7 +3008,8 @@
   );
   _.takeLast = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [Integer, f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [Integer, f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: takeLast,
@@ -2962,7 +3042,8 @@
   );
   _.dropLast = {
     consts: {f: [Applicative, Foldable, Monoid]},
-    types: (f => a => [Integer, f (a), $.Maybe (f (a))])
+    types: (Maybe => f => a => [Integer, f (a), Maybe (f (a))])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: dropLast,
@@ -2989,7 +3070,8 @@
   };
   _.takeWhile = {
     consts: {},
-    types: (a => [Predicate (a), $.Array (a), $.Array (a)])
+    types: (Array => a => [Predicate (a), Array (a), Array (a)])
+           ($.Array)
            (TypeVariable ('a')),
     impl: takeWhile,
   };
@@ -3015,7 +3097,8 @@
   };
   _.dropWhile = {
     consts: {},
-    types: (a => [Predicate (a), $.Array (a), $.Array (a)])
+    types: (Array => a => [Predicate (a), Array (a), Array (a)])
+           ($.Array)
            (TypeVariable ('a')),
     impl: dropWhile,
   };
@@ -3073,7 +3156,8 @@
   //. ```
   _.all = {
     consts: {f: [Foldable]},
-    types: (f => a => [Predicate (a), f (a), $.Boolean])
+    types: (Boolean => f => a => [Predicate (a), f (a), Boolean])
+           ($.Boolean)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: curry2 (Z.all),
@@ -3098,7 +3182,8 @@
   //. ```
   _.any = {
     consts: {f: [Foldable]},
-    types: (f => a => [Predicate (a), f (a), $.Boolean])
+    types: (Boolean => f => a => [Predicate (a), f (a), Boolean])
+           ($.Boolean)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: curry2 (Z.any),
@@ -3131,7 +3216,8 @@
   //. ```
   _.none = {
     consts: {f: [Foldable]},
-    types: (f => a => [Predicate (a), f (a), $.Boolean])
+    types: (Boolean => f => a => [Predicate (a), f (a), Boolean])
+           ($.Boolean)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: curry2 (Z.none),
@@ -3208,7 +3294,9 @@
   //. ```
   _.joinWith = {
     consts: {},
-    types: [$.String, $.Array ($.String), $.String],
+    types: (String => Array => [String, Array (String), String])
+           ($.String)
+           ($.Array),
     impl: invoke1 ('join'),
   };
 
@@ -3243,7 +3331,8 @@
   //. ```
   _.elem = {
     consts: {a: [Setoid], f: [Foldable]},
-    types: (f => a => [a, f (a), $.Boolean])
+    types: (Boolean => f => a => [a, f (a), Boolean])
+           ($.Boolean)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: curry2 (Z.elem),
@@ -3269,7 +3358,8 @@
   );
   _.find = {
     consts: {f: [Foldable]},
-    types: (f => a => [Predicate (a), f (a), $.Maybe (a)])
+    types: (Maybe => f => a => [Predicate (a), f (a), Maybe (a)])
+           ($.Maybe)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: find,
@@ -3389,7 +3479,11 @@
   };
   _.unfold = {
     consts: {},
-    types: (a => b => [Fn (b) ($.Maybe ($.Pair (a) (b))), b, $.Array (a)])
+    types: (Maybe => Pair => Array => a => b =>
+              [Fn (b) (Maybe (Pair (a) (b))), b, Array (a)])
+           ($.Maybe)
+           ($.Pair)
+           ($.Array)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: unfold,
@@ -3418,7 +3512,8 @@
   };
   _.range = {
     consts: {},
-    types: [Integer, Integer, $.Array (Integer)],
+    types: (Array => [Integer, Integer, Array (Integer)])
+           ($.Array),
     impl: range,
   };
 
@@ -3455,7 +3550,9 @@
   };
   _.groupBy = {
     consts: {},
-    types: (a => [Fn (a) (Predicate (a)), $.Array (a), $.Array ($.Array (a))])
+    types: (Array => a =>
+              [Fn (a) (Predicate (a)), Array (a), Array (Array (a))])
+           ($.Array)
            (TypeVariable ('a')),
     impl: groupBy,
   };
@@ -3582,8 +3679,9 @@
   };
   _.zipWith = {
     consts: {},
-    types: (a => b => c =>
-              [Fn (a) (Fn (b) (c)), $.Array (a), $.Array (b), $.Array (c)])
+    types: (Array => a => b => c =>
+              [Fn (a) (Fn (b) (c)), Array (a), Array (b), Array (c)])
+           ($.Array)
            (TypeVariable ('a'))
            (TypeVariable ('b'))
            (TypeVariable ('c')),
@@ -3607,7 +3705,10 @@
   //. ```
   _.zip = {
     consts: {},
-    types: (a => b => [$.Array (a), $.Array (b), $.Array ($.Pair (a) (b))])
+    types: (Array => Pair => a => b =>
+              [Array (a), Array (b), Array (Pair (a) (b))])
+           ($.Array)
+           ($.Pair)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: zipWith (Pair),
@@ -3636,7 +3737,8 @@
   };
   _.prop = {
     consts: {},
-    types: (a => b => [$.String, a, b])
+    types: (String => a => b => [String, a, b])
+           ($.String)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: prop,
@@ -3665,7 +3767,9 @@
   );
   _.props = {
     consts: {},
-    types: (a => b => [$.Array ($.String), a, b])
+    types: (Array => String => a => b => [Array (String), a, b])
+           ($.Array)
+           ($.String)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: props,
@@ -3700,7 +3804,10 @@
   );
   _.get = {
     consts: {},
-    types: (a => b => [Predicate (Any), $.String, a, $.Maybe (b)])
+    types: (String => Maybe => a => b =>
+              [Predicate (Any), String, a, Maybe (b)])
+           ($.String)
+           ($.Maybe)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: get,
@@ -3732,7 +3839,11 @@
   );
   _.gets = {
     consts: {},
-    types: (a => b => [Predicate (Any), $.Array ($.String), a, $.Maybe (b)])
+    types: (Array => String => Maybe => a => b =>
+              [Predicate (Any), Array (String), a, Maybe (b)])
+           ($.Array)
+           ($.String)
+           ($.Maybe)
            (TypeVariable ('a'))
            (TypeVariable ('b')),
     impl: gets,
@@ -3772,7 +3883,9 @@
   );
   _.value = {
     consts: {},
-    types: (a => [$.String, StrMap (a), $.Maybe (a)])
+    types: (String => Maybe => a => [String, StrMap (a), Maybe (a)])
+           ($.String)
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: value,
   };
@@ -3793,7 +3906,8 @@
   };
   _.singleton = {
     consts: {},
-    types: (a => [$.String, a, StrMap (a)])
+    types: (String => a => [String, a, StrMap (a)])
+           ($.String)
            (TypeVariable ('a')),
     impl: singleton,
   };
@@ -3819,7 +3933,8 @@
   );
   _.insert = {
     consts: {},
-    types: (a => [$.String, a, StrMap (a), StrMap (a)])
+    types: (String => a => [String, a, StrMap (a), StrMap (a)])
+           ($.String)
            (TypeVariable ('a')),
     impl: insert,
   };
@@ -3847,7 +3962,8 @@
   };
   _.remove = {
     consts: {},
-    types: (a => [$.String, StrMap (a), StrMap (a)])
+    types: (String => a => [String, StrMap (a), StrMap (a)])
+           ($.String)
            (TypeVariable ('a')),
     impl: remove,
   };
@@ -3862,7 +3978,9 @@
   //. ```
   _.keys = {
     consts: {},
-    types: (a => [StrMap (a), $.Array ($.String)])
+    types: (Array => String => a => [StrMap (a), Array (String)])
+           ($.Array)
+           ($.String)
            (TypeVariable ('a')),
     impl: Object.keys,
   };
@@ -3877,7 +3995,8 @@
   //. ```
   _.values = {
     consts: {},
-    types: (a => [StrMap (a), $.Array (a)])
+    types: (Array => a => [StrMap (a), Array (a)])
+           ($.Array)
            (TypeVariable ('a')),
     impl: Object.values,
   };
@@ -3895,7 +4014,11 @@
   );
   _.pairs = {
     consts: {},
-    types: (a => [StrMap (a), $.Array ($.Pair ($.String) (a))])
+    types: (Array => Pair => String => a =>
+              [StrMap (a), Array (Pair (String) (a))])
+           ($.Array)
+           ($.Pair)
+           ($.String)
            (TypeVariable ('a')),
     impl: pairs,
   };
@@ -3921,7 +4044,9 @@
   );
   _.fromPairs = {
     consts: {f: [Foldable]},
-    types: (f => a => [f ($.Pair ($.String) (a)), StrMap (a)])
+    types: (Pair => String => f => a => [f (Pair (String) (a)), StrMap (a)])
+           ($.Pair)
+           ($.String)
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a')),
     impl: fromPairs,
@@ -3945,7 +4070,7 @@
   );
   _.negate = {
     consts: {},
-    types: [$.ValidNumber, $.ValidNumber],
+    types: [ValidNumber, ValidNumber],
     impl: negate,
   };
 
@@ -3962,7 +4087,7 @@
   );
   _.add = {
     consts: {},
-    types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
+    types: [FiniteNumber, FiniteNumber, FiniteNumber],
     impl: add,
   };
 
@@ -3985,7 +4110,7 @@
   //. ```
   _.sum = {
     consts: {f: [Foldable]},
-    types: (f => [f ($.FiniteNumber), $.FiniteNumber])
+    types: (f => [f (FiniteNumber), FiniteNumber])
            (UnaryTypeVariable ('f')),
     impl: reduce (add) (0),
   };
@@ -4003,7 +4128,7 @@
   );
   _.sub = {
     consts: {},
-    types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
+    types: [FiniteNumber, FiniteNumber, FiniteNumber],
     impl: sub,
   };
 
@@ -4020,7 +4145,7 @@
   );
   _.mult = {
     consts: {},
-    types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
+    types: [FiniteNumber, FiniteNumber, FiniteNumber],
     impl: mult,
   };
 
@@ -4043,7 +4168,7 @@
   //. ```
   _.product = {
     consts: {f: [Foldable]},
-    types: (f => [f ($.FiniteNumber), $.FiniteNumber])
+    types: (f => [f (FiniteNumber), FiniteNumber])
            (UnaryTypeVariable ('f')),
     impl: reduce (mult) (1),
   };
@@ -4062,7 +4187,7 @@
   );
   _.div = {
     consts: {},
-    types: [$.NonZeroFiniteNumber, $.FiniteNumber, $.FiniteNumber],
+    types: [NonZeroFiniteNumber, FiniteNumber, FiniteNumber],
     impl: div,
   };
 
@@ -4079,7 +4204,7 @@
   //. ```
   _.pow = {
     consts: {},
-    types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
+    types: [FiniteNumber, FiniteNumber, FiniteNumber],
     impl: C (curry2 (Math.pow)),
   };
 
@@ -4101,7 +4226,8 @@
   );
   _.even = {
     consts: {},
-    types: [Integer, $.Boolean],
+    types: (Boolean => [Integer, Boolean])
+           ($.Boolean),
     impl: even,
   };
 
@@ -4121,7 +4247,8 @@
   );
   _.odd = {
     consts: {},
-    types: [Integer, $.Boolean],
+    types: (Boolean => [Integer, Boolean])
+           ($.Boolean),
     impl: odd,
   };
 
@@ -4155,7 +4282,9 @@
   };
   _.parseDate = {
     consts: {},
-    types: [$.String, $.Maybe ($.ValidDate)],
+    types: (String => Maybe => [String, Maybe (ValidDate)])
+           ($.String)
+           ($.Maybe),
     impl: parseDate,
   };
 
@@ -4206,7 +4335,10 @@
   );
   _.parseFloat = {
     consts: {},
-    types: [$.String, $.Maybe ($.Number)],
+    types: (String => Maybe => Number => [String, Maybe (Number)])
+           ($.String)
+           ($.Maybe)
+           ($.Number),
     impl: parseFloat_,
   };
 
@@ -4244,8 +4376,10 @@
   };
   _.parseInt = {
     consts: {},
-    types: (Radix => [Radix, $.String, $.Maybe (Integer)])
-           (NullaryType ('Radix') ('') ([Integer]) (x => x >= 2 && x <= 36)),
+    types: (Radix => String => Maybe => [Radix, String, Maybe (Integer)])
+           (NullaryType ('Radix') ('') ([Integer]) (x => x >= 2 && x <= 36))
+           ($.String)
+           ($.Maybe),
     impl: parseInt_,
   };
 
@@ -4273,13 +4407,14 @@
   );
   _.parseJson = {
     consts: {},
-    types: (a => [Predicate (Any), $.String, $.Maybe (a)])
+    types: (String => Maybe => a => [Predicate (Any), String, Maybe (a)])
+           ($.String)
+           ($.Maybe)
            (TypeVariable ('a')),
     impl: parseJson,
   };
 
   //. ### RegExp
-
 
   //  toMaybe :: a? -> Maybe a
   const toMaybe = x => x == null ? Nothing : Just (x);
@@ -4305,7 +4440,9 @@
   );
   _.regex = {
     consts: {},
-    types: [$.RegexFlags, $.String, $.RegExp],
+    types: (String => RegExp => [RegexFlags, String, RegExp])
+           ($.String)
+           ($.RegExp),
     impl: regex,
   };
 
@@ -4328,7 +4465,8 @@
   );
   _.regexEscape = {
     consts: {},
-    types: [$.String, $.String],
+    types: (String => [String, String])
+           ($.String),
     impl: regexEscape,
   };
 
@@ -4349,7 +4487,10 @@
   );
   _.test = {
     consts: {},
-    types: [$.RegExp, $.String, $.Boolean],
+    types: (RegExp => String => Boolean => [RegExp, String, Boolean])
+           ($.RegExp)
+           ($.String)
+           ($.Boolean),
     impl: test,
   };
 
@@ -4383,9 +4524,11 @@
   );
   _.match = {
     consts: {},
-    types: [$.NonGlobalRegExp,
-            $.String,
-            $.Maybe ($.Array ($.Maybe ($.String)))],
+    types: (String => Maybe => Array =>
+              [NonGlobalRegExp, String, Maybe (Array (Maybe (String)))])
+           ($.String)
+           ($.Maybe)
+           ($.Array),
     impl: match,
   };
 
@@ -4415,7 +4558,11 @@
   );
   _.matchAll = {
     consts: {},
-    types: [$.GlobalRegExp, $.String, $.Array ($.Array ($.Maybe ($.String)))],
+    types: (String => Array => Maybe =>
+              [GlobalRegExp, String, Array (Array (Maybe (String)))])
+           ($.String)
+           ($.Array)
+           ($.Maybe),
     impl: matchAll,
   };
 
@@ -4455,10 +4602,12 @@
   );
   _.replace = {
     consts: {},
-    types: [Fn ($.Array ($.Maybe ($.String))) ($.String),
-            $.RegExp,
-            $.String,
-            $.String],
+    types: (Array => Maybe => String => RegExp =>
+              [Fn (Array (Maybe (String))) (String), RegExp, String, String])
+           ($.Array)
+           ($.Maybe)
+           ($.String)
+           ($.RegExp),
     impl: replace,
   };
 
@@ -4476,7 +4625,8 @@
   //. ```
   _.toUpper = {
     consts: {},
-    types: [$.String, $.String],
+    types: (String => [String, String])
+           ($.String),
     impl: invoke0 ('toUpperCase'),
   };
 
@@ -4492,7 +4642,8 @@
   //. ```
   _.toLower = {
     consts: {},
-    types: [$.String, $.String],
+    types: (String => [String, String])
+           ($.String),
     impl: invoke0 ('toLowerCase'),
   };
 
@@ -4506,7 +4657,8 @@
   //. ```
   _.trim = {
     consts: {},
-    types: [$.String, $.String],
+    types: (String => [String, String])
+           ($.String),
     impl: invoke0 ('trim'),
   };
 
@@ -4531,7 +4683,9 @@
   };
   _.stripPrefix = {
     consts: {},
-    types: [$.String, $.String, $.Maybe ($.String)],
+    types: (String => Maybe => [String, String, Maybe (String)])
+           ($.String)
+           ($.Maybe),
     impl: stripPrefix,
   };
 
@@ -4556,7 +4710,9 @@
   };
   _.stripSuffix = {
     consts: {},
-    types: [$.String, $.String, $.Maybe ($.String)],
+    types: (String => Maybe => [String, String, Maybe (String)])
+           ($.String)
+           ($.Maybe),
     impl: stripSuffix,
   };
 
@@ -4579,7 +4735,9 @@
   };
   _.words = {
     consts: {},
-    types: [$.String, $.Array ($.String)],
+    types: (String => Array => [String, Array (String)])
+           ($.String)
+           ($.Array),
     impl: words,
   };
 
@@ -4596,7 +4754,9 @@
   //. ```
   _.unwords = {
     consts: {},
-    types: [$.Array ($.String), $.String],
+    types: (Array => String => [Array (String), String])
+           ($.Array)
+           ($.String),
     impl: invoke1 ('join') (' '),
   };
 
@@ -4617,7 +4777,9 @@
   );
   _.lines = {
     consts: {},
-    types: [$.String, $.Array ($.String)],
+    types: (String => Array => [String, Array (String)])
+           ($.String)
+           ($.Array),
     impl: lines,
   };
 
@@ -4637,7 +4799,9 @@
   );
   _.unlines = {
     consts: {},
-    types: [$.Array ($.String), $.String],
+    types: (Array => String => [Array (String), String])
+           ($.Array)
+           ($.String),
     impl: unlines,
   };
 
@@ -4654,7 +4818,9 @@
   //. ```
   _.splitOn = {
     consts: {},
-    types: [$.String, $.String, $.Array ($.String)],
+    types: (String => Array => [String, String, Array (String)])
+           ($.String)
+           ($.Array),
     impl: invoke1 ('split'),
   };
 
@@ -4700,7 +4866,9 @@
   );
   _.splitOnRegex = {
     consts: {},
-    types: [$.GlobalRegExp, $.String, $.Array ($.String)],
+    types: (String => Array => [GlobalRegExp, String, Array (String)])
+           ($.String)
+           ($.Array),
     impl: splitOnRegex,
   };
 
