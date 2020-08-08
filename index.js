@@ -1229,13 +1229,14 @@
   //. > S.reduce_ (S.prepend) ([]) (Cons (1) (Cons (2) (Cons (3) (Nil))))
   //. [3, 2, 1]
   //. ```
+  const reduce_ = B (reduce) (C);
   _.reduce_ = {
     consts: {f: [Foldable]},
     types: (f => a => b => [Fn (a) (Fn (b) (b)), b, f (a), b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: B (reduce) (C),
+    impl: reduce_,
   };
 
   //# traverse :: (Applicative f, Traversable t) => TypeRep f -> (a -> f b) -> t a -> f (t b)
@@ -1482,13 +1483,14 @@
   //. > S.chain (S.parseInt (10)) (S.Just ('XXX'))
   //. Nothing
   //. ```
+  const chain = curry2 (Z.chain);
   _.chain = {
     consts: {m: [Chain]},
     types: (m => a => b => [Fn (a) (m (b)), m (a), m (b)])
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: curry2 (Z.chain),
+    impl: chain,
   };
 
   //# join :: Chain m => m (m a) -> m a
@@ -1738,14 +1740,13 @@
   //. > S.pipe ([S.add (1), Math.sqrt, S.sub (1)]) (99)
   //. 9
   //. ```
-  const pipe = fs => x => reduce (T) (x) (fs);
   _.pipe = {
     consts: {f: [Foldable]},
     types: (f => a => b => [f (Fn (Any) (Any)), a, b])
            (UnaryTypeVariable ('f'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: pipe,
+    impl: C (reduce_ (I)),
   };
 
   //# pipeK :: (Foldable f, Chain m) => f (Any -> m Any) -> m a -> m b
@@ -1762,7 +1763,6 @@
   //. > S.pipeK ([S.tail, S.tail, S.head]) (S.Just ([1, 2, 3, 4]))
   //. Just (3)
   //. ```
-  const pipeK = fs => x => Z.reduce ((x, f) => Z.chain (f, x), x, fs);
   _.pipeK = {
     consts: {f: [Foldable], m: [Chain]},
     types: (f => m => a => b => [f (Fn (Any) (m (Any))), m (a), m (b)])
@@ -1770,7 +1770,7 @@
            (UnaryTypeVariable ('m'))
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: pipeK,
+    impl: C (reduce_ (chain)),
   };
 
   //# on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
