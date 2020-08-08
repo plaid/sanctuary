@@ -1229,7 +1229,9 @@
   //. > S.reduce_ (S.prepend) ([]) (Cons (1) (Cons (2) (Cons (3) (Nil))))
   //. [3, 2, 1]
   //. ```
-  const reduce_ = B (reduce) (C);
+  const reduce_ = (
+    B (reduce) (C)
+  );
   _.reduce_ = {
     consts: {f: [Foldable]},
     types: (f => a => b => [Fn (a) (Fn (b) (b)), b, f (a), b])
@@ -1483,7 +1485,9 @@
   //. > S.chain (S.parseInt (10)) (S.Just ('XXX'))
   //. Nothing
   //. ```
-  const chain = curry2 (Z.chain);
+  const chain = (
+    curry2 (Z.chain)
+  );
   _.chain = {
     consts: {m: [Chain]},
     types: (m => a => b => [Fn (a) (m (b)), m (a), m (b)])
@@ -1648,7 +1652,9 @@
   //. > S.I ('foo')
   //. 'foo'
   //. ```
-  const I = x => x;
+  const I = x => (
+    x
+  );
   _.I = {
     consts: {},
     types: (a => [a, a])
@@ -1668,7 +1674,9 @@
   //. > S.map (S.K (42)) (S.range (0) (5))
   //. [42, 42, 42, 42, 42]
   //. ```
-  const K = x => y => x;
+  const K = x => y => (
+    x
+  );
   _.K = {
     consts: {},
     types: (a => b => [a, b, a])
@@ -1690,13 +1698,12 @@
   //. > S.map (S.T (100)) ([S.add (1), Math.sqrt])
   //. [101, 10]
   //. ```
-  const T = x => f => f (x);
   _.T = {
     consts: {},
     types: (a => b => [a, Fn (a) (b), b])
            (TypeVariable ('a'))
            (TypeVariable ('b')),
-    impl: T,
+    impl: C (I),
   };
 
   //. ### Composition
@@ -1784,7 +1791,9 @@
   //. > S.on (S.concat) (S.reverse) ([1, 2, 3]) ([4, 5, 6])
   //. [3, 2, 1, 6, 5, 4]
   //. ```
-  const on = f => g => x => y => f (g (x)) (g (y));
+  const on = f => g => x => y => (
+    f (g (x)) (g (y))
+  );
   _.on = {
     consts: {},
     types: (a => b => c => [Fn (b) (Fn (b) (c)), Fn (a) (b), a, a, c])
@@ -1826,7 +1835,9 @@
   //. > S.pair (S.concat) (S.Pair ('foo') ('bar'))
   //. 'foobar'
   //. ```
-  const pair = f => ([fst, snd]) => f (fst) (snd);
+  const pair = f => ([fst, snd]) => (
+    f (fst) (snd)
+  );
   _.pair = {
     consts: {},
     types: (a => b => c => [Fn (a) (Fn (b) (c)), $.Pair (a) (b), c])
@@ -1930,7 +1941,9 @@
   //. > S.isNothing (S.Just (42))
   //. false
   //. ```
-  const isNothing = maybe => maybe.isNothing;
+  const isNothing = maybe => (
+    maybe.isNothing
+  );
   _.isNothing = {
     consts: {},
     types: (a => [$.Maybe (a), $.Boolean])
@@ -1949,7 +1962,9 @@
   //. > S.isJust (S.Nothing)
   //. false
   //. ```
-  const isJust = maybe => maybe.isJust;
+  const isJust = maybe => (
+    maybe.isJust
+  );
   _.isJust = {
     consts: {},
     types: (a => [$.Maybe (a), $.Boolean])
@@ -1972,7 +1987,9 @@
   //. > S.maybe (0) (S.prop ('length')) (S.Nothing)
   //. 0
   //. ```
-  const maybe = x => f => maybe => maybe.isJust ? f (maybe.value) : x;
+  const maybe = x => f => maybe => (
+    maybe.isJust ? f (maybe.value) : x
+  );
   _.maybe = {
     consts: {},
     types: (a => b => [b, Fn (a) (b), $.Maybe (a), b])
@@ -2111,7 +2128,9 @@
   //. > S.maybeToNullable (S.Nothing)
   //. null
   //. ```
-  const maybeToNullable = maybe => maybe.isJust ? maybe.value : null;
+  const maybeToNullable = maybe => (
+    maybe.isJust ? maybe.value : null
+  );
   _.maybeToNullable = {
     consts: {},
     types: (a => [$.Maybe (a), $.Nullable (a)])
@@ -2174,7 +2193,9 @@
   //. > S.isLeft (S.Right (42))
   //. false
   //. ```
-  const isLeft = either => either.isLeft;
+  const isLeft = either => (
+    either.isLeft
+  );
   _.isLeft = {
     consts: {},
     types: (a => b => [$.Either (a) (b), $.Boolean])
@@ -2194,7 +2215,9 @@
   //. > S.isRight (S.Left ('Cannot divide by zero'))
   //. false
   //. ```
-  const isRight = either => either.isRight;
+  const isRight = either => (
+    either.isRight
+  );
   _.isRight = {
     consts: {},
     types: (a => b => [$.Either (a) (b), $.Boolean])
@@ -2219,7 +2242,9 @@
   //. > S.either (S.toUpper) (S.show) (S.Right (42))
   //. '42'
   //. ```
-  const either = l => r => either => (either.isLeft ? l : r) (either.value);
+  const either = l => r => either => (
+    (either.isLeft ? l : r) (either.value)
+  );
   _.either = {
     consts: {},
     types: (a => b => c => [Fn (a) (c), Fn (b) (c), $.Either (a) (b), c])
@@ -2243,7 +2268,9 @@
   //. > S.fromLeft ('abc') (S.Right (123))
   //. 'abc'
   //. ```
-  const fromLeft = x => either (I) (K (x));
+  const fromLeft = x => (
+    either (I) (K (x))
+  );
   _.fromLeft = {
     consts: {},
     types: (a => b => [a, $.Either (a) (b), a])
@@ -2266,7 +2293,9 @@
   //. > S.fromRight (123) (S.Left ('abc'))
   //. 123
   //. ```
-  const fromRight = x => either (K (x)) (I);
+  const fromRight = x => (
+    either (K (x)) (I)
+  );
   _.fromRight = {
     consts: {},
     types: (a => b => [b, $.Either (a) (b), b])
@@ -2354,7 +2383,9 @@
   //. > S.tagBy (S.odd) (1)
   //. Right (1)
   //. ```
-  const tagBy = pred => x => (pred (x) ? Right : Left) (x);
+  const tagBy = pred => x => (
+    (pred (x) ? Right : Left) (x)
+  );
   _.tagBy = {
     consts: {},
     types: (a => [Predicate (a), a, $.Either (a) (a)])
@@ -2408,7 +2439,9 @@
   //. > S.and (true) (true)
   //. true
   //. ```
-  const and = x => y => x && y;
+  const and = x => y => (
+    x && y
+  );
   _.and = {
     consts: {},
     types: [$.Boolean, $.Boolean, $.Boolean],
@@ -2432,7 +2465,9 @@
   //. > S.or (true) (true)
   //. true
   //. ```
-  const or = x => y => x || y;
+  const or = x => y => (
+    x || y
+  );
   _.or = {
     consts: {},
     types: [$.Boolean, $.Boolean, $.Boolean],
@@ -2452,7 +2487,9 @@
   //. > S.not (true)
   //. false
   //. ```
-  const not = x => !x;
+  const not = x => (
+    !x
+  );
   _.not = {
     consts: {},
     types: [$.Boolean, $.Boolean],
@@ -2492,7 +2529,9 @@
   //. > S.boolean ('no') ('yes') (true)
   //. 'yes'
   //. ```
-  const boolean = x => y => b => b ? y : x;
+  const boolean = x => y => b => (
+    b ? y : x
+  );
   _.boolean = {
     consts: {},
     types: (a => [a, a, $.Boolean, a])
@@ -2517,7 +2556,9 @@
   //. > S.ifElse (x => x < 0) (Math.abs) (Math.sqrt) (16)
   //. 4
   //. ```
-  const ifElse = pred => f => g => x => (pred (x) ? f : g) (x);
+  const ifElse = pred => f => g => x => (
+    (pred (x) ? f : g) (x)
+  );
   _.ifElse = {
     consts: {},
     types: (a => b => [Predicate (a), Fn (a) (b), Fn (a) (b), a, b])
@@ -2541,7 +2582,9 @@
   //. > S.when (x => x >= 0) (Math.sqrt) (-1)
   //. -1
   //. ```
-  const when = pred => f => x => pred (x) ? f (x) : x;
+  const when = pred => f => x => (
+    pred (x) ? f (x) : x
+  );
   _.when = {
     consts: {},
     types: (a => [Predicate (a), Fn (a) (a), a, a])
@@ -2564,7 +2607,9 @@
   //. > S.unless (x => x < 0) (Math.sqrt) (-1)
   //. -1
   //. ```
-  const unless = pred => f => x => pred (x) ? x : f (x);
+  const unless = pred => f => x => (
+    pred (x) ? x : f (x)
+  );
   _.unless = {
     consts: {},
     types: (a => [Predicate (a), Fn (a) (a), a, a])
@@ -2773,25 +2818,25 @@
   //. > S.take (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Cons (5) (Nil))))))
   //. Just (Cons (1) (Cons (2) (Cons (3) (Nil))))
   //. ```
-  const _takeDrop = (arrayCase, generalCase) => n => xs => {
-    if (n < 0) return Nothing;
-
-    //  Fast path for arrays.
-    if (Array.isArray (xs)) {
-      return n <= xs.length ? Just (arrayCase (n, xs)) : Nothing;
-    }
-
-    //  m :: Maybe (Pair Integer (f a))
-    const m = Z.reduce (
-      (m, x) => Z.map (([n, xs]) => Pair (n - 1) (generalCase (n, xs, x)), m),
-      Just (Pair (n) (Z.empty (xs.constructor))),
-      xs
-    );
-    return Z.map (Pair.snd, Z.reject (([n]) => n > 0, m));
-  };
-  const take = _takeDrop (
-    (n, xs) => xs.slice (0, n),
-    (n, xs, x) => n > 0 ? Z.append (x, xs) : xs
+  const take = n => xs => (
+    n < 0 ? Nothing :
+    Array.isArray (xs) ? n <= xs.length ? Just (xs.slice (0, n)) : Nothing :
+    Z.map (
+      Pair.snd,
+      Z.reject (
+        ([n]) => n > 0,
+        Z.reduce (
+          (m, x) => (
+            Z.map (
+              ([n, xs]) => Pair (n - 1) (n > 0 ? Z.append (x, xs) : xs),
+              m
+            )
+          ),
+          Just (Pair (n) (Z.empty (xs.constructor))),
+          xs
+        )
+      )
+    )
   );
   _.take = {
     consts: {f: [Applicative, Foldable, Monoid]},
@@ -2823,9 +2868,25 @@
   //. > S.drop (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Cons (5) (Nil))))))
   //. Just (Cons (4) (Cons (5) (Nil)))
   //. ```
-  const drop = _takeDrop (
-    (n, xs) => xs.slice (n),
-    (n, xs, x) => n > 0 ? xs : Z.append (x, xs)
+  const drop = n => xs => (
+    n < 0 ? Nothing :
+    Array.isArray (xs) ? n <= xs.length ? Just (xs.slice (n)) : Nothing :
+    Z.map (
+      Pair.snd,
+      Z.reject (
+        ([n]) => n > 0,
+        Z.reduce (
+          (m, x) => (
+            Z.map (
+              ([n, xs]) => Pair (n - 1) (n > 0 ? xs : Z.append (x, xs)),
+              m
+            )
+          ),
+          Just (Pair (n) (Z.empty (xs.constructor))),
+          xs
+        )
+      )
+    )
   );
   _.drop = {
     consts: {f: [Applicative, Foldable, Monoid]},
@@ -2857,7 +2918,9 @@
   //. > S.takeLast (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Nil)))))
   //. Just (Cons (2) (Cons (3) (Cons (4) (Nil))))
   //. ```
-  const takeLast = n => xs => Z.map (Z.reverse, take (n) (Z.reverse (xs)));
+  const takeLast = n => xs => (
+    Z.map (Z.reverse, take (n) (Z.reverse (xs)))
+  );
   _.takeLast = {
     consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
@@ -2888,7 +2951,9 @@
   //. > S.dropLast (3) (Cons (1) (Cons (2) (Cons (3) (Cons (4) (Nil)))))
   //. Just (Cons (1) (Nil))
   //. ```
-  const dropLast = n => xs => Z.map (Z.reverse, drop (n) (Z.reverse (xs)));
+  const dropLast = n => xs => (
+    Z.map (Z.reverse, drop (n) (Z.reverse (xs)))
+  );
   _.dropLast = {
     consts: {f: [Applicative, Foldable, Monoid]},
     types: (f => a => [Integer, f (a), $.Maybe (f (a))])
@@ -3135,7 +3200,9 @@
   //. > S.joinWith (':') (['foo', 'bar', 'baz'])
   //. 'foo:bar:baz'
   //. ```
-  const joinWith = separator => ss => ss.join (separator);
+  const joinWith = separator => ss => (
+    ss.join (separator)
+  );
   _.joinWith = {
     consts: {},
     types: [$.String, $.Array ($.String), $.String],
@@ -3194,7 +3261,9 @@
   //. > S.find (S.lt (0)) ([1, 2, 3, 4, 5])
   //. Nothing
   //. ```
-  const find = pred => findMap (x => pred (x) ? Just (x) : Nothing);
+  const find = pred => (
+    findMap (x => pred (x) ? Just (x) : Nothing)
+  );
   _.find = {
     consts: {f: [Foldable]},
     types: (f => a => [Predicate (a), f (a), $.Maybe (a)])
@@ -3487,30 +3556,6 @@
     impl: curry2 (Z.sortBy),
   };
 
-  //# zip :: Array a -> Array b -> Array (Pair a b)
-  //.
-  //. Returns an array of pairs of corresponding elements from the given
-  //. arrays. The length of the resulting array is equal to the length of
-  //. the shorter input array.
-  //.
-  //. See also [`zipWith`](#zipWith).
-  //.
-  //. ```javascript
-  //. > S.zip (['a', 'b']) (['x', 'y', 'z'])
-  //. [Pair ('a') ('x'), Pair ('b') ('y')]
-  //.
-  //. > S.zip ([1, 3, 5]) ([2, 4])
-  //. [Pair (1) (2), Pair (3) (4)]
-  //. ```
-  const zip = xs => ys => zipWith (Pair) (xs) (ys);
-  _.zip = {
-    consts: {},
-    types: (a => b => [$.Array (a), $.Array (b), $.Array ($.Pair (a) (b))])
-           (TypeVariable ('a'))
-           (TypeVariable ('b')),
-    impl: zip,
-  };
-
   //# zipWith :: (a -> b -> c) -> Array a -> Array b -> Array c
   //.
   //. Returns the result of combining, pairwise, the given arrays using the
@@ -3540,6 +3585,29 @@
            (TypeVariable ('b'))
            (TypeVariable ('c')),
     impl: zipWith,
+  };
+
+  //# zip :: Array a -> Array b -> Array (Pair a b)
+  //.
+  //. Returns an array of pairs of corresponding elements from the given
+  //. arrays. The length of the resulting array is equal to the length of
+  //. the shorter input array.
+  //.
+  //. See also [`zipWith`](#zipWith).
+  //.
+  //. ```javascript
+  //. > S.zip (['a', 'b']) (['x', 'y', 'z'])
+  //. [Pair ('a') ('x'), Pair ('b') ('y')]
+  //.
+  //. > S.zip ([1, 3, 5]) ([2, 4])
+  //. [Pair (1) (2), Pair (3) (4)]
+  //. ```
+  _.zip = {
+    consts: {},
+    types: (a => b => [$.Array (a), $.Array (b), $.Array ($.Pair (a) (b))])
+           (TypeVariable ('a'))
+           (TypeVariable ('b')),
+    impl: zipWith (Pair),
   };
 
   //. ### Object
@@ -3804,12 +3872,11 @@
   //. > S.sort (S.values ({a: 1, c: 3, b: 2}))
   //. [1, 2, 3]
   //. ```
-  const values = strMap => Z.map (k => strMap[k], Object.keys (strMap));
   _.values = {
     consts: {},
     types: (a => [StrMap (a), $.Array (a)])
            (TypeVariable ('a')),
-    impl: values,
+    impl: Object.values,
   };
 
   //# pairs :: StrMap a -> Array (Pair String a)
@@ -3870,7 +3937,9 @@
   //. > S.negate (-42)
   //. 42
   //. ```
-  const negate = n => -n;
+  const negate = n => (
+    -n
+  );
   _.negate = {
     consts: {},
     types: [$.ValidNumber, $.ValidNumber],
@@ -3885,7 +3954,9 @@
   //. > S.add (1) (1)
   //. 2
   //. ```
-  const add = x => y => x + y;
+  const add = x => y => (
+    x + y
+  );
   _.add = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
@@ -3924,7 +3995,9 @@
   //. > S.map (S.sub (1)) ([1, 2, 3])
   //. [0, 1, 2]
   //. ```
-  const sub = y => x => x - y;
+  const sub = y => x => (
+    x - y
+  );
   _.sub = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
@@ -3939,7 +4012,9 @@
   //. > S.mult (4) (2)
   //. 8
   //. ```
-  const mult = x => y => x * y;
+  const mult = x => y => (
+    x * y
+  );
   _.mult = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
@@ -3979,7 +4054,9 @@
   //. > S.map (S.div (2)) ([0, 1, 2, 3])
   //. [0, 0.5, 1, 1.5]
   //. ```
-  const div = y => x => x / y;
+  const div = y => x => (
+    x / y
+  );
   _.div = {
     consts: {},
     types: [$.NonZeroFiniteNumber, $.FiniteNumber, $.FiniteNumber],
@@ -3997,11 +4074,10 @@
   //. > S.map (S.pow (0.5)) ([1, 4, 9, 16, 25])
   //. [1, 2, 3, 4, 5]
   //. ```
-  const pow = exp => base => Math.pow (base, exp);
   _.pow = {
     consts: {},
     types: [$.FiniteNumber, $.FiniteNumber, $.FiniteNumber],
-    impl: pow,
+    impl: C (curry2 (Math.pow)),
   };
 
   //. ### Integer
@@ -4017,7 +4093,9 @@
   //. > S.even (99)
   //. false
   //. ```
-  const even = n => n % 2 === 0;
+  const even = n => (
+    n % 2 === 0
+  );
   _.even = {
     consts: {},
     types: [Integer, $.Boolean],
@@ -4035,7 +4113,9 @@
   //. > S.odd (42)
   //. false
   //. ```
-  const odd = n => n % 2 !== 0;
+  const odd = n => (
+    n % 2 !== 0
+  );
   _.odd = {
     consts: {},
     types: [Integer, $.Boolean],
@@ -4217,7 +4297,9 @@
   //. > S.regex ('g') (':\\d+:')
   //. /:\d+:/g
   //. ```
-  const regex = flags => source => new RegExp (source, flags);
+  const regex = flags => source => (
+    new RegExp (source, flags)
+  );
   _.regex = {
     consts: {},
     types: [$.RegexFlags, $.String, $.RegExp],
@@ -4238,7 +4320,9 @@
   //. > S.regexEscape ('-=*{XYZ}*=-')
   //. '\\-=\\*\\{XYZ\\}\\*=\\-'
   //. ```
-  const regexEscape = s => s.replace (/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const regexEscape = s => (
+    s.replace (/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+  );
   _.regexEscape = {
     consts: {},
     types: [$.String, $.String],
@@ -4257,7 +4341,9 @@
   //. > S.test (/^a/) ('banana')
   //. false
   //. ```
-  const test = pattern => s => withRegex (pattern, () => pattern.test (s));
+  const test = pattern => s => (
+    withRegex (pattern, () => pattern.test (s))
+  );
   _.test = {
     consts: {},
     types: [$.RegExp, $.String, $.Boolean],
@@ -4385,7 +4471,9 @@
   //. > S.toUpper ('ABC def 123')
   //. 'ABC DEF 123'
   //. ```
-  const toUpper = s => s.toUpperCase ();
+  const toUpper = s => (
+    s.toUpperCase ()
+  );
   _.toUpper = {
     consts: {},
     types: [$.String, $.String],
@@ -4402,7 +4490,9 @@
   //. > S.toLower ('ABC def 123')
   //. 'abc def 123'
   //. ```
-  const toLower = s => s.toLowerCase ();
+  const toLower = s => (
+    s.toLowerCase ()
+  );
   _.toLower = {
     consts: {},
     types: [$.String, $.String],
@@ -4417,7 +4507,9 @@
   //. > S.trim ('\t\t foo bar \n')
   //. 'foo bar'
   //. ```
-  const trim = s => s.trim ();
+  const trim = s => (
+    s.trim ()
+  );
   _.trim = {
     consts: {},
     types: [$.String, $.String],
@@ -4508,7 +4600,9 @@
   //. > S.unwords (['foo', 'bar', 'baz'])
   //. 'foo bar baz'
   //. ```
-  const unwords = ss => ss.join (' ');
+  const unwords = ss => (
+    ss.join (' ')
+  );
   _.unwords = {
     consts: {},
     types: [$.Array ($.String), $.String],
@@ -4547,7 +4641,9 @@
   //. > S.unlines (['foo', 'bar', 'baz'])
   //. 'foo\nbar\nbaz\n'
   //. ```
-  const unlines = xs => xs.reduce ((s, x) => s + x + '\n', '');
+  const unlines = xs => (
+    xs.reduce ((s, x) => s + x + '\n', '')
+  );
   _.unlines = {
     consts: {},
     types: [$.Array ($.String), $.String],
@@ -4565,7 +4661,9 @@
   //. > S.splitOn ('::') ('foo::bar::baz')
   //. ['foo', 'bar', 'baz']
   //. ```
-  const splitOn = separator => s => s.split (separator);
+  const splitOn = separator => s => (
+    s.split (separator)
+  );
   _.splitOn = {
     consts: {},
     types: [$.String, $.String, $.Array ($.String)],
