@@ -7,7 +7,7 @@ const eq = require ('./internal/eq');
 
 test ('foldMap', () => {
 
-  eq (S.show (S.foldMap)) ('foldMap :: (Monoid b, Foldable f) => TypeRep b -> (a -> b) -> f a -> b');
+  eq (S.show (S.foldMap)) ('foldMap :: (Foldable f, Monoid m) => TypeRep m -> (a -> m) -> f a -> m');
 
   const repeat = n => (new Array (n + 1)).join (String (n));
   eq (S.foldMap (String) (repeat) ([])) ('');

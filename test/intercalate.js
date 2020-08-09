@@ -8,7 +8,7 @@ const eq = require ('./internal/eq');
 
 test ('intercalate', () => {
 
-  eq (S.show (S.intercalate)) ('intercalate :: (Monoid a, Foldable f) => a -> f a -> a');
+  eq (S.show (S.intercalate)) ('intercalate :: (Foldable f, Monoid m) => m -> f m -> m');
 
   eq (S.intercalate (', ') ([])) ('');
   eq (S.intercalate (', ') (['foo'])) ('foo');

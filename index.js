@@ -579,7 +579,7 @@
   (Boolean => Array => Object => def =>
      def ('create')
          ({})
-         ([RecordType ({checkTypes: Boolean, env: Array (Any)}), Object])
+         ([RecordType ({checkTypes: Boolean, env: Array (Type)}), Object])
          (create))
   ($.Boolean)
   ($.Array)
@@ -1139,12 +1139,12 @@
   //. Right (8)
   //. ```
   _.bimap =
-  (p => a => b => c => d => def =>
+  (f => a => b => c => d => def =>
      def ('bimap')
-         ({p: [Bifunctor]})
-         ([Fn (a) (b), Fn (c) (d), p (a) (c), p (b) (d)])
+         ({f: [Bifunctor]})
+         ([Fn (a) (b), Fn (c) (d), f (a) (c), f (b) (d)])
          (curry3 (Z.bimap)))
-  (BinaryTypeVariable ('p'))
+  (BinaryTypeVariable ('f'))
   (TypeVariable ('a'))
   (TypeVariable ('b'))
   (TypeVariable ('c'))
@@ -3520,13 +3520,13 @@
   //. [1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 6, 0, 0, 0, 7, 8, 0, 0, 0, 9]
   //. ```
   _.intercalate =
-  (f => a => def =>
+  (f => m => def =>
      def ('intercalate')
-         ({a: [Monoid], f: [Foldable]})
-         ([a, f (a), a])
+         ({m: [Monoid], f: [Foldable]})
+         ([m, f (m), m])
          (curry2 (Z.intercalate)))
   (UnaryTypeVariable ('f'))
-  (TypeVariable ('a'));
+  (TypeVariable ('m'));
 
   //# foldMap :: (Monoid m, Foldable f) => TypeRep m -> (a -> m) -> f a -> m
   //.
@@ -3541,14 +3541,14 @@
   //. [11, 12, 21, 22, 31, 32]
   //. ```
   _.foldMap =
-  (f => a => b => def =>
+  (f => a => m => def =>
      def ('foldMap')
-         ({b: [Monoid], f: [Foldable]})
-         ([TypeRep (b), Fn (a) (b), f (a), b])
+         ({m: [Monoid], f: [Foldable]})
+         ([TypeRep (m), Fn (a) (m), f (a), m])
          (curry3 (Z.foldMap)))
   (UnaryTypeVariable ('f'))
   (TypeVariable ('a'))
-  (TypeVariable ('b'));
+  (TypeVariable ('m'));
 
   //# unfold :: (b -> Maybe (Pair a b)) -> b -> Array a
   //.
