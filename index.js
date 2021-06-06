@@ -334,6 +334,10 @@
 //. const $ = window.sanctuaryDef;
 //. // ...
 //. ```
+//. If you are using rollup in your project, where you have integrated Sanctuary, you might
+//. get errors. Please import builtins and globals from rollup-plugin-node-builtins and 
+//. rollup-plugin-node-globals respectively, in the rollup config file. These are needed to add 
+//. the utils folder, which is referenced in the sanctuary code.
 //.
 //. ## API
 
