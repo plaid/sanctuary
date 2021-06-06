@@ -43,6 +43,9 @@
 //.
 //. Sanctuary is designed to work in Node.js and in ES5-compatible browsers.
 //.
+//. Please refer to this video: [Sanctuary, Programming Safely in an Uncertain World](https://www.youtube.com/watch?v=a2astdDbOjk)
+//. for a brief introduction of Sanctuary's functionality.
+//.
 //. ## Folktale
 //.
 //. [Folktale][], like Sanctuary, is a standard library for functional
