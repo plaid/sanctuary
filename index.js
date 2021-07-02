@@ -1391,6 +1391,29 @@
     impl: curry2 (Z.ap)
   };
 
+  //# ap_ :: Apply f => f a -> f (a -> b) -> f b
+  //.
+  //. Variant of [`ap`](#ap) that takes its arguments in flipped order. Allows
+  //. for convenient lifting of functions with arities greater than 3. See also
+  //. [`lift2`](#lift2) and [`lift3`](#lift3).
+  //.
+  //. ```javascript
+  //. > const Array4 = a => b => c => d => [a, b, c, d]
+  //.
+  //. > S.pipe ([
+  //. .   S.map (Array4),
+  //. .   S.ap_ (S.Just ('b')),
+  //. .   S.ap_ (S.Just ('c')),
+  //. .   S.ap_ (S.Just ('d')),
+  //. . ]) (S.Just ('a'))
+  //. Just (['a', 'b', 'c', 'd'])
+  //. ```
+  _.ap_ = {
+    consts: {f: [Z.Apply]},
+    types: [f (a), f ($.Fn (a) (b)), f (b)],
+    impl: C (curry2 (Z.ap))
+  };
+
   //# lift2 :: Apply f => (a -> b -> c) -> f a -> f b -> f c
   //.
   //. Promotes a curried binary function to a function that operates on two
